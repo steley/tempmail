@@ -28,6 +28,7 @@
 
   var mails = [];       // keep full mail objects by index
   var currentMail = -1;
+  var currentId = null; // last mailbox name acked by the server
   var editing = false;
 
   /* ---------- helpers ---------- */
@@ -38,6 +39,7 @@
   }
 
   function setMailAddress(id) {
+    currentId = id;
     try { localStorage.setItem('shortid', id); } catch (e) { /* private mode */ }
     $shortid.value = id + '@' + location.hostname;
   }
@@ -111,8 +113,7 @@
     editing = false;
     $shortid.setAttribute('disabled', '');
     $shortid.placeholder = 'Loading ...';
-    setMailAddress(name);
-    socket.emit('set shortid', name);   // no page reload needed
+    socket.emit('set shortid', name);   // no page reload needed; UI updates on server ack
   });
 
   $shortid.addEventListener('keydown', function (e) {
@@ -195,6 +196,19 @@
   socket.on('shortid', function (id) {
     setMailAddress(id);
     setStatus('connected', 'Connected — live inbox active');
+  });
+
+  socket.on('shortid rejected', function (data) {
+    var reason = data && data.reason === 'reserved'
+      ? 'That name is reserved — pick another'
+      : 'Invalid name — use 1-32 letters, digits, . _ -';
+    setStatus('error', reason);
+    // revert display to the address we actually hold (localStorage was never updated)
+    try {
+      var saved = localStorage.getItem('shortid');
+      if (saved) $shortid.value = saved + '@' + location.hostname;
+      else if (currentId) $shortid.value = currentId + '@' + location.hostname;
+    } catch (e) { /* private mode */ }
   });
 
   socket.on('mail', function (mail) {

@@ -207,6 +207,7 @@ main { padding-top: 28px; }
 
 .conn-status.connected .dot { background: #4ade80; }
 .conn-status.disconnected .dot { background: #f87171; }
+.conn-status.error .dot { background: #fbbf24; }
 
 /* ---------- Info grid ---------- */
 .info-grid {

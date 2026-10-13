@@ -40,8 +40,12 @@ export function attachRealtime(httpServer, mailGateway) {
 
     socket.on('set shortid', (name) => {
       const requested = String(name ?? '').trim().toLowerCase();
-      if (!isValidMailboxName(requested) || isReserved(requested)) {
-        // reject silently (same UX as the old blacklist) but never register it
+      if (!isValidMailboxName(requested)) {
+        socket.emit('shortid rejected', { name: requested, reason: 'invalid' });
+        return;
+      }
+      if (isReserved(requested)) {
+        socket.emit('shortid rejected', { name: requested, reason: 'reserved' });
         return;
       }
       claim(socket, requested);

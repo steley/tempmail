@@ -17,23 +17,6 @@ public/                  frontend (vanilla JS, unchanged wire protocol)
 scripts/e2e.mjs          end-to-end delivery test
 ```
 
-## Key changes vs the old codebase
-
-- **`mailin` (abandoned since 2017) replaced** with `smtp-server` + `mailparser`.
-- **Memory leak fixed**: dead sockets are removed from the registry on disconnect.
-- **Mailbox names validated by allowlist** (`/^[a-z0-9](...)$/`), reserved names
-  (admin, root, ...) can never be claimed. Old code only had a keyword blacklist.
-- **ES modules**, Node >= 20, no body-parser/shortid/old socket.io 1.x.
-- **Message size cap** (default 5 MB, `SMTP_MAX_MAIL_BYTES`), oversize rejected with 552.
-- Socket.io 4 — frontend loads the matching client from `/socket.io/socket.io.js`.
-
-Wire protocol (unchanged from the original, so the refreshed frontend works as-is):
-
-```
-client -> server: 'request shortid' | 'set shortid'
-server -> client: 'shortid' (name) | 'mail' ({ headers, html, text })
-```
-
 ## Run
 
 ```bash

@@ -28,11 +28,21 @@ export function startSmtpGateway() {
       const chunks = [];
       let size = 0;
       let tooBig = false;
+      let done = false;   // guard: after a stream error, 'end' still fires — cb must only run once
+      let dataEnded = false; // 'end' seen: parsing in flight, don't let 'close' race it
+      const finish = (err) => {
+        if (done) return;
+        done = true;
+        cb(err);
+      };
 
       stream.on('data', (chunk) => {
+        if (tooBig) return;
         size += chunk.length;
         if (size > config.smtp.maxMailBytes) {
           tooBig = true;
+          chunks.length = 0;
+          stream.destroy(); // stop draining the rest of an oversized message
           return;
         }
         chunks.push(chunk);
@@ -42,8 +52,10 @@ export function startSmtpGateway() {
         if (tooBig) {
           const err = new Error('Message too big');
           err.responseCode = 552;
-          return cb(err);
+          return finish(err);
         }
+        if (done) return;
+        dataEnded = true;
         try {
           const raw = Buffer.concat(chunks);
           const parsed = await simpleParser(raw);
@@ -58,18 +70,26 @@ export function startSmtpGateway() {
             text: parsed.text ?? '',
           });
           log.info(`accepted mail (${size} bytes) from ${session.envelope.mailFrom?.address ?? '?'}`);
-          cb();
+          finish();
         } catch (err) {
-      log.warn('parse error:', err.message);
+          log.warn('parse error:', err.message);
           const perr = new Error('Unable to process message');
           perr.responseCode = 451;
-          cb(perr);
+          finish(perr);
         }
       });
 
       stream.on('error', (err) => {
         log.warn('stream error:', err.message);
-        cb(err);
+        finish(err);
+      });
+
+      // destroy() suppresses 'end' — settle the callback on 'close' instead
+      stream.on('close', () => {
+        if (done || dataEnded) return;
+        const err = new Error(tooBig ? 'Message too big' : 'Connection closed early');
+        err.responseCode = tooBig ? 552 : 451;
+        finish(err);
       });
     },
 

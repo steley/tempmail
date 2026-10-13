@@ -9,6 +9,7 @@ const log = createLogger('smtp');
 /**
  * Inbound SMTP gateway. Replaces the abandoned `mailin` package.
  * Emits: 'mail' (parsedMail) for every accepted message.
+ * Returns the emitter with a .close(cb) for graceful shutdown.
  */
 export function startSmtpGateway() {
   const gateway = new EventEmitter();
@@ -102,6 +103,15 @@ export function startSmtpGateway() {
   server.listen(config.smtp.port, config.smtp.host, () => {
     log.info(`listening on ${config.smtp.host}:${config.smtp.port}`);
   });
+
+  // stop accepting new connections; existing sessions get `timeoutMs` to finish
+  gateway.close = (timeoutMs = 2000, cb = () => {}) => {
+    let settled = false;
+    const done = () => { if (!settled) { settled = true; cb(); } };
+    server.close(() => done());
+    setTimeout(() => { server.unref(); done(); }, timeoutMs).unref();
+    log.info('closing: no new SMTP connections accepted');
+  };
 
   return gateway;
 }

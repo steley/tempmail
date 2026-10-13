@@ -1,6 +1,9 @@
 import { Server } from 'socket.io';
 import config from '../config.js';
 import { newMailboxName, isValidMailboxName } from '../lib/id.js';
+import { createLogger } from '../lib/logger.js';
+
+const log = createLogger('realtime');
 
 /**
  * Realtime layer. Wire protocol is identical to the original forsaken-mail
@@ -11,6 +14,7 @@ import { newMailboxName, isValidMailboxName } from '../lib/id.js';
 export function attachRealtime(httpServer, mailGateway) {
   const io = new Server(httpServer, { cors: { origin: false } });
   const socketsByMailbox = new Map(); // mailbox name -> Set<socket>
+  const rateWindow = new Map();       // mailbox name -> array of broadcast timestamps
 
   const claim = (socket, name) => {
     release(socket);
@@ -25,7 +29,10 @@ export function attachRealtime(httpServer, mailGateway) {
     const set = socketsByMailbox.get(prev);
     if (set) {
       set.delete(socket);
-      if (set.size === 0) socketsByMailbox.delete(prev);
+      if (set.size === 0) {
+        socketsByMailbox.delete(prev);
+        rateWindow.delete(prev); // no listeners left — reset the rate window too
+      }
     }
     socket.data.mailbox = null;
   };
@@ -60,7 +67,24 @@ export function attachRealtime(httpServer, mailGateway) {
     const match = to.match(/([\w._-]+)@[\w._-]+/);
     if (!match) return;
     const targets = socketsByMailbox.get(match[1]);
-    if (targets) for (const socket of targets) socket.emit('mail', mail);
+    if (!targets) return;
+
+    // per-mailbox sliding-window rate limit on broadcasts (abuse guard)
+    const now = Date.now();
+    let seen = rateWindow.get(match[1]);
+    if (!seen) rateWindow.set(match[1], (seen = []));
+    while (seen.length && now - seen[0] > 60_000) seen.shift();
+    if (seen.length >= config.smtp.ratePerMinute) {
+      if (!seen.warned) {
+        log.warn(`rate limit hit for "${match[1]}" — dropping further broadcasts this minute`);
+        seen.warned = true;
+      }
+      return;
+    }
+    seen.warned = false;
+    seen.push(now);
+
+    for (const socket of targets) socket.emit('mail', mail);
   });
 
   return io;

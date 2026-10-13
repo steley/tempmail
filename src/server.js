@@ -27,7 +27,7 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
   process.on(signal, () => {
     log.info(`${signal} received, shutting down`);
     httpServer.close(() => process.exit(0));
-    mailGateway.removeAllListeners?.();
+    mailGateway.close(2000); // reject new SMTP sessions, give live ones 2s to finish
     setTimeout(() => process.exit(1), 5000).unref();
   });
 }

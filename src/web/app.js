@@ -10,6 +10,20 @@ export function createWebApp() {
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
 
+  // defense-in-depth headers; 'unsafe-inline' styles are for the page shell,
+  // mail content itself is sandboxed in a script-less iframe
+  app.use((req, res, next) => {
+    res.set({
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'no-referrer',
+      'Content-Security-Policy':
+        "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; " +
+        "frame-src 'self'; script-src 'self'; connect-src 'self' ws: wss:;",
+    });
+    next();
+  });
+
   app.use(express.static(config.web.staticDir, { maxAge: config.web.staticMaxAgeMs }));
 
   app.get('/healthz', (req, res) => res.json({ ok: true }));

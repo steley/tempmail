@@ -145,7 +145,7 @@
 
     var items = $maillist.querySelectorAll('li');
     for (var i = 0; i < items.length; i++) {
-      items[i].classList.toggle('active', i === idx); // list is newest-first
+      items[i].classList.toggle('active', items.length - 1 - i === idx); // list is newest-first
     }
   }
 
@@ -160,7 +160,7 @@
   $closeMail.addEventListener('click', closeMail);
 
   $viewRaw.addEventListener('click', function () {
-    if (currentMail < 0) return;
+    if (currentMail < 0 || !mails[currentMail]) return;
     $rawContent.textContent = JSON.stringify(mails[currentMail], null, 2);
     $raw.hidden = false;
     if (window.Prism) Prism.highlightElement($rawContent);
@@ -226,6 +226,14 @@
     }
 
     mails.push(mail);
+    // cap: keep the newest 50 — long-open tabs must not grow without bound
+    if (mails.length > 50) {
+      mails.shift();
+      var list = $maillist.querySelectorAll('li');
+      if (list.length) list[list.length - 1].remove(); // oldest is last (newest-first list)
+      if (currentMail > -1) currentMail--;
+      if (currentMail < 0) closeMail();
+    }
     var idx = mails.length - 1;
 
     var li = document.createElement('li');

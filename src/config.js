@@ -18,6 +18,8 @@ export default {
     host: env('SMTP_HOST', '0.0.0.0'),
     banner: env('SMTP_BANNER', 'tempmail ready'),
     maxMailBytes: Number(env('SMTP_MAX_MAIL_BYTES', 5 * 1024 * 1024)),
+    // per-mailbox broadcast rate limit: mails forwarded to sockets per minute
+    ratePerMinute: Number(env('SMTP_RATE_PER_MIN', 20)),
     // reserved names that must never be claimed by visitors
     reservedNames: [
       'admin', 'administrator', 'postmaster', 'webmaster', 'hostmaster',

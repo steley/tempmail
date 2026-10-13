@@ -34,6 +34,7 @@ PORT=8080 SMTP_PORT=2525 npm start   # dev-friendly ports
 | `SMTP_PORT`         | 25      | inbound SMTP port               |
 | `SMTP_HOST`         | 0.0.0.0 | SMTP bind address               |
 | `SMTP_MAX_MAIL_BYTES` | 5242880 | max accepted message size    |
+| `SMTP_RATE_PER_MIN` | 20      | per-mailbox live-broadcast rate limit |
 
 ## Test
 
@@ -47,6 +48,8 @@ node scripts/e2e.mjs                   # in another
 - Port 25 must be reachable directly (MX record → this host). No CDN/proxy for mail; web may sit behind Cloudflare/nginx.
 - Inherent design caveat (unchanged from the original): anyone may `set shortid`
   to any valid name and receive that mailbox's live mail. That is the product.
+- Abuse guards: per-mailbox broadcast rate limiting (`SMTP_RATE_PER_MIN`), security
+  headers (CSP, X-Frame-Options) on the web app, and graceful SMTP shutdown on restart.
 
 ## Docker deployment (from git clone to running)
 

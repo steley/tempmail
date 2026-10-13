@@ -1,10 +1,16 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 const env = (key, fallback) => process.env[key] ?? fallback;
+
+// src/ -> project root/public (one level up, works both locally and in Docker /app)
+const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
 export default {
   web: {
     port: Number(env('PORT', 3000)),
     host: env('HOST', '0.0.0.0'),
-    staticDir: new URL('../../public/', import.meta.url).pathname,
+    staticDir: publicDir,
     staticMaxAgeMs: 60 * 60 * 1000,
   },
   smtp: {

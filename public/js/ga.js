@@ -4,10 +4,9 @@
  * Self-hosting: replace this file with your own tracking code, or
  * blank it out to disable analytics entirely. No HTML edits needed.
  *
- * Note: the server CSP (src/web/app.js) currently whitelists
- * googletagmanager.com and *.google-analytics.com / *.analytics.google.com.
- * If you swap in another provider, update the CSP `script-src` and
- * `connect-src` directives accordingly.
+ * CSP: Google's analytics origins are whitelisted by default. For another
+ * provider, set ANALYTICS_CSP_EXTRA (its origins) and optionally
+ * ANALYTICS_DISABLED=1 on the server — see README "Analytics".
  */
 (function () {
   var GA_ID = 'G-ZH4T4XZ5BR'; // set to '' to disable

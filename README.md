@@ -35,6 +35,8 @@ PORT=8080 SMTP_PORT=2525 npm start   # dev-friendly ports
 | `SMTP_HOST`         | 0.0.0.0 | SMTP bind address               |
 | `SMTP_MAX_MAIL_BYTES` | 5242880 | max accepted message size    |
 | `SMTP_RATE_PER_MIN` | 20      | per-mailbox live-broadcast rate limit |
+| `ANALYTICS_DISABLED` | (unset) | set to `1` to drop Google Analytics origins from the CSP |
+| `ANALYTICS_CSP_EXTRA` | (unset) | space-separated origins to whitelist for your own analytics provider (script-src + connect-src) |
 
 ## Test
 
@@ -47,8 +49,19 @@ node scripts/e2e.mjs                   # in another
 
 All page tracking lives in a single file: `public/js/ga.js` (Google Analytics 4,
 IP anonymized). Self-hosting? Replace it with your own tracking code or blank it
-out — no HTML edits needed. If you use a provider other than GA, also update the
-CSP `script-src` / `connect-src` directives in `src/web/app.js`.
+out — no HTML edits needed.
+
+The server CSP only whitelists Google's analytics origins by default. To use a
+different provider:
+
+1. Replace `public/js/ga.js` with your provider's snippet.
+2. Whitelist its origins via `ANALYTICS_CSP_EXTRA`, e.g.:
+   - **Plausible**: `ANALYTICS_CSP_EXTRA=https://plausible.io`
+   - **Umami** (self-hosted): `ANALYTICS_CSP_EXTRA=https://umami.example.com`
+   - **Matomo** (self-hosted): `ANALYTICS_CSP_EXTRA=https://matomo.example.com`
+   - **Cloudflare Web Analytics**: `ANALYTICS_CSP_EXTRA=https://static.cloudflareinsights.com https://cloudflareinsights.com`
+3. Using none at all? Set `ANALYTICS_DISABLED=1` to strip the Google origins
+   from the CSP too.
 
 ## Deployment notes
 

@@ -7,6 +7,12 @@ const log = createLogger('web');
 
 export function createWebApp() {
   const app = express();
+
+  // extra analytics origins for self-hosted/custom providers (space-separated)
+  const rawExtra = String(process.env.ANALYTICS_CSP_EXTRA ?? '').trim();
+  const cspExtra = rawExtra ? ' ' + rawExtra.split(/\s+/).join(' ') : '';
+  const gaAllowed = process.env.ANALYTICS_DISABLED !== '1';
+
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
 
@@ -17,10 +23,16 @@ export function createWebApp() {
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
       'Referrer-Policy': 'no-referrer',
+      // Analytics CSP: GA origins whitelisted by default.
+      // Self-hosters: set ANALYTICS_DISABLED=1 to drop them, and/or
+      // ANALYTICS_CSP_EXTRA="https://a.example.com https://b.example.com"
+      // to whitelist another provider's origins (script-src + connect-src).
       'Content-Security-Policy':
         "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; " +
-        "frame-src 'self'; script-src 'self' https://www.googletagmanager.com; " +
-        "connect-src 'self' ws: wss: https://*.google-analytics.com https://*.analytics.google.com;",
+        "frame-src 'self'; " +
+        "script-src 'self'" + (gaAllowed ? ' https://www.googletagmanager.com' : '') + cspExtra + '; ' +
+        "connect-src 'self' ws: wss:" +
+        (gaAllowed ? ' https://*.google-analytics.com https://*.analytics.google.com' : '') + cspExtra + ';',
     });
     next();
   });

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <!-- rounded square background -->
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#g)"/>
+  <!-- envelope body -->
+  <rect x="14" y="20" width="36" height="26" rx="4" fill="#ffffff"/>
+  <!-- envelope flap -->
+  <path d="M15.5 22.5 L32 35 L48.5 22.5" fill="none" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- temporal hint: circular arrow, top-right -->
+  <g transform="translate(47,17)">
+    <circle r="10" fill="#fbbf24"/>
+    <circle r="6.2" fill="none" stroke="#ffffff" stroke-width="2.4"/>
+    <path d="M 0 -3.2 L 0 0.4 L 3 0.4" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

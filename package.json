@@ -1,0 +1,21 @@
+{
+  "name": "tempmail-v2",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Temporary email service with live inbox over WebSocket",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "GPL-2.0",
+  "dependencies": {
+    "express": "^4.21.2",
+    "mailparser": "^3.7.2",
+    "smtp-server": "^3.13.6",
+    "socket.io": "^4.8.1"
+  }
+}

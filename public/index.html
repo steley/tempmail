@@ -13,8 +13,8 @@
   <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png">
   <link rel="apple-touch-icon" href="/logo.png">
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-  <link rel="stylesheet" href="/css/modern.css">
-  <link rel="stylesheet" href="/css/prism.css">
+  <link rel="stylesheet" href="/css/modern.css?v=20261014d">
+  <link rel="stylesheet" href="/css/prism.css?v=20261014d">
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZH4T4XZ5BR"></script>
@@ -119,21 +119,28 @@
 <main class="container">
   <!-- Address bar -->
   <section class="address-card">
-    <div class="address-label">Your temporary email address</div>
-    <div class="address-row">
-      <button id="copyBtn" class="btn btn-icon" title="Copy to clipboard" aria-label="Copy address">
-        <svg id="copyIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-      </button>
-      <input id="shortid" type="text" placeholder="Loading ..." disabled spellcheck="false" autocomplete="off">
-      <button id="refreshShortid" class="btn btn-icon" title="Change to a new random address" aria-label="New random address">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
-      </button>
-      <button id="editShortid" class="btn btn-icon" title="Set a custom address" aria-label="Custom address">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-      </button>
+    <div class="address-flex">
+      <div class="address-main">
+        <div class="address-label">Your temporary email address</div>
+        <div class="address-row">
+          <button id="copyBtn" class="btn btn-icon" title="Copy to clipboard" aria-label="Copy address">
+            <svg id="copyIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <input id="shortid" type="text" placeholder="Loading ..." disabled spellcheck="false" autocomplete="off">
+          <button id="refreshShortid" class="btn btn-icon" title="Change to a new random address" aria-label="New random address">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+          </button>
+          <button id="editShortid" class="btn btn-icon" title="Set a custom address" aria-label="Custom address">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          </button>
+        </div>
+        <div id="statusDot" class="conn-status connecting"><span class="dot"></span><span id="statusText">Connecting…</span></div>
+      </div>
+      <div class="address-qr" title="Scan to use this address on another device">
+        <canvas id="qrCanvas" width="120" height="120" aria-label="QR code of the email address"></canvas>
+      </div>
     </div>
     <div id="copyToast" class="copy-toast" role="status">Copied!</div>
-    <div id="statusDot" class="conn-status connecting"><span class="dot"></span><span id="statusText">Connecting…</span></div>
   </section>
 
   <!-- Info -->
@@ -161,8 +168,16 @@
 
     <ul id="maillist" class="mail-list"></ul>
     <div id="emptyState" class="empty-state">
-      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
-      <p>Waiting for your first email…<br><small>Send a message to the address above.</small></p>
+      <div class="empty-icon">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+        <span class="empty-pulse"></span>
+      </div>
+      <p class="empty-title">Waiting for your first email…</p>
+      <ol class="empty-steps">
+        <li><b>1</b><span>Copy the address above</span></li>
+        <li><b>2</b><span>Paste it where you need an email</span></li>
+        <li><b>3</b><span>Messages appear here instantly</span></li>
+      </ol>
     </div>
 
     <div id="mailcard" class="mail-view" hidden>
@@ -229,7 +244,8 @@
 </footer>
 
 <script src="/socket.io/socket.io.js"></script>
-<script src="/js/prism.js"></script>
-<script src="/js/app.js"></script>
+<script src="/js/qrcode.js?v=20261014d"></script>
+<script src="/js/prism.js?v=20261014d"></script>
+<script src="/js/app.js?v=20261014d"></script>
 </body>
 </html>

@@ -25,6 +25,8 @@
   var $rawContent = document.getElementById('rawContent');
   var $statusDot = document.getElementById('statusDot');
   var $statusText = document.getElementById('statusText');
+  var $copyIcon = document.getElementById('copyIcon');
+  var copyIconHTML = $copyIcon ? $copyIcon.outerHTML : '';
 
   var mails = [];       // keep full mail objects by index
   var currentMail = -1;
@@ -42,7 +44,37 @@
   function setMailAddress(id) {
     currentId = id;
     try { localStorage.setItem('shortid', id); } catch (e) { /* private mode */ }
-    $shortid.value = id + '@' + location.hostname;
+    var full = id + '@' + location.hostname;
+    $shortid.value = full;
+    drawQR(full);
+  }
+
+  /* ---------- QR code ---------- */
+
+  function drawQR(text) {
+    var canvas = document.getElementById('qrCanvas');
+    if (!canvas || !window.qrcode || !text) return;
+    try {
+      var qr = window.qrcode(0, 'M');
+      qr.addData(text);
+      qr.make();
+      var ctx = canvas.getContext('2d');
+      var count = qr.getModuleCount();
+      var quiet = 2; // 每侧 2 模块，外围白边由卡片白底补足
+      var scale = Math.floor(120 / (count + quiet * 2));
+      var size = (count + quiet * 2) * scale; // 画布随内容收紧，不留多余白边
+      canvas.width = size;
+      canvas.height = size;
+      var offset = quiet * scale;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#17202a';
+      for (var r = 0; r < count; r++) {
+        for (var c = 0; c < count; c++) {
+          if (qr.isDark(r, c)) ctx.fillRect(offset + c * scale, offset + r * scale, scale, scale);
+        }
+      }
+    } catch (e) { /* QR 失败不影响主功能 */ }
   }
 
   function escapeHtml(s) {
@@ -66,12 +98,27 @@
     setTimeout(function () { $copyToast.classList.remove('show'); }, 1400);
   }
 
+  // 复制成功后图标短暂变 ✓，1.4s 后还原
+  var iconTimer = null;
+  function flashCopyIcon() {
+    if (!$copyIcon) return;
+    if (iconTimer) clearTimeout(iconTimer);
+    $copyIcon.outerHTML =
+      '<svg id="copyIcon" class="copy-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    $copyIcon = document.getElementById('copyIcon');
+    iconTimer = setTimeout(function () {
+      $copyIcon.outerHTML = copyIconHTML;
+      $copyIcon = document.getElementById('copyIcon');
+      iconTimer = null;
+    }, 1400);
+  }
+
   /* ---------- clipboard ---------- */
 
   $copyBtn.addEventListener('click', function () {
     var text = $shortid.value;
     if (!text) return;
-    function done() { showToast(); }
+    function done() { showToast(); flashCopyIcon(); }
     function fallback() {
       $shortid.removeAttribute('disabled');
       $shortid.select();
@@ -265,6 +312,8 @@
       '<span class="subject">' + escapeHtml((mail.headers && mail.headers.subject) || 'No Subject') + '</span>' +
       '<span class="time">' + escapeHtml(formatDate(mail.headers && mail.headers.date)) + '</span>';
     li.addEventListener('click', function () { openMail(idx); });
+    li.classList.add('new');
+    li.addEventListener('animationend', function () { li.classList.remove('new'); }, { once: true });
     $maillist.prepend(li);
     $empty.style.display = 'none';
   });

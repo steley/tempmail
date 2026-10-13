@@ -43,6 +43,13 @@ PORT=3100 SMTP_PORT=2525 npm start &   # in one terminal
 node scripts/e2e.mjs                   # in another
 ```
 
+## Analytics
+
+All page tracking lives in a single file: `public/js/ga.js` (Google Analytics 4,
+IP anonymized). Self-hosting? Replace it with your own tracking code or blank it
+out — no HTML edits needed. If you use a provider other than GA, also update the
+CSP `script-src` / `connect-src` directives in `src/web/app.js`.
+
 ## Deployment notes
 
 - Port 25 must be reachable directly (MX record → this host). No CDN/proxy for mail; web may sit behind Cloudflare/nginx.

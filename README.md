@@ -1,4 +1,4 @@
-# tempmail-v2
+# Tempmail
 
 Temporary email service with live inbox over WebSocket. Full rewrite of
 forsaken-mail (2015-era Node.js) with a modern, dependency-clean stack.
@@ -61,7 +61,89 @@ node scripts/e2e.mjs                   # in another
 
 ## Deployment notes
 
-- Port 25 must be reachable directly (MX record → this host). No CDN/proxy in front.
-- Docker: `docker build -t tempmail-v2 . && docker run -p 25:25 -p 3000:3000 tempmail-v2`
+- Port 25 must be reachable directly (MX record → this host). No CDN/proxy for mail; web may sit behind Cloudflare/nginx.
 - Inherent design caveat (unchanged from the original): anyone may `set shortid`
   to any valid name and receive that mailbox's live mail. That is the product.
+
+## Docker deployment (from git clone to running)
+
+Requires: a server (Ubuntu shown) with Docker installed (`curl -fsSL https://get.docker.com | sh`),
+DNS: A record of your mail domain → server IP, MX record → that domain.
+
+```bash
+# 1. clone & build
+git clone <repo-url> /var/www/tempmail
+cd /var/www/tempmail
+docker build -t tempmail .
+
+# 2. run (restarts on reboot/crash)
+docker run -d --name tempmail \
+  -p 3000:3000 \
+  -p 25:25 \
+  --restart unless-stopped \
+  tempmail
+
+# 3. verify
+curl localhost:3000/healthz      # {"ok":true}
+docker logs -f tempmail          # structured logs; SMTP should log "listening on 0.0.0.0:25"
+```
+
+### Fronting the web UI with nginx (optional, mail stays direct)
+
+Only web traffic goes through nginx; SMTP :25 must point straight at the host.
+
+```nginx
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name your.domain;
+
+    ssl_certificate     /etc/letsencrypt/live/your.domain/fullchain.pem;   # certbot
+    ssl_certificate_key /etc/letsencrypt/live/your.domain/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # WebSocket — required for the live inbox
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 86400;
+    }
+}
+```
+
+```bash
+ln -sf /etc/nginx/sites-available/your.domain /etc/nginx/sites-enabled/your.domain
+nginx -t && systemctl reload nginx
+```
+
+Behind Cloudflare: leave proxying on for web (A record orange-cloud); WebSocket
+must be enabled (Network settings). DNS-only (grey cloud) the record if you serve
+mail UI elsewhere — MX record itself must never point at a proxy.
+
+### Updating
+
+```bash
+git pull
+docker rm -f tempmail
+docker build -t tempmail .
+docker run -d --name tempmail -p 3000:3000 -p 25:25 --restart unless-stopped tempmail
+```
+
+### Troubleshooting
+
+| Symptom | Check |
+|---------|-------|
+| `port 25 already allocated` on `docker run` | old container still bound: `docker ps -a \| grep 25`, then `docker rm -f <name>` |
+| Site 404 through the whole stack | verify origin directly: `curl -sI http://127.0.0.1:3000/` — if 404 there, rebuild the image from latest code |
+| Page loads but inbox stuck "Connecting…" | WS handshake: `curl -s "https://your.domain/socket.io/?EIO=4&transport=polling"` must return `0{"sid":...}`; if it does, hard-refresh — browser/CF is serving stale frontend JS |
+| Mail accepted in logs but never shown | recipient local part must match the claimed mailbox name; check `[smtp] accepted mail` lines in `docker logs` |
+| `nginx recv() failed (104)` spikes | container restarting — `docker ps` for restart loop, then `docker logs tempmail` |

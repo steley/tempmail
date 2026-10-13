@@ -7,8 +7,11 @@ import { createLogger } from './lib/logger.js';
 
 const log = createLogger('server');
 
+// crash fast and let the container supervisor restart us — running on in an
+// inconsistent state after an uncaught exception is worse than a short outage
 process.on('uncaughtException', (err) => {
-  log.error('uncaughtException:', err.stack ?? err.message);
+  log.error('uncaughtException, exiting:', err.stack ?? err.message);
+  process.exit(1);
 });
 process.on('unhandledRejection', (reason) => {
   log.error('unhandledRejection:', reason instanceof Error ? reason.stack : reason);

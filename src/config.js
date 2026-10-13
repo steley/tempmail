@@ -2,6 +2,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const env = (key, fallback) => process.env[key] ?? fallback;
+// numeric env guard: invalid values fall back instead of becoming NaN
+// (NaN would silently disable the rate limit / size cap downstream)
+const envNum = (key, fallback) => {
+  const n = Number(process.env[key]);
+  return Number.isFinite(n) ? n : fallback;
+};
 
 // src/ -> project root/public (one level up, works both locally and in Docker /app)
 const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
@@ -16,12 +22,16 @@ export default {
     staticMaxAgeMs: 0,
   },
   smtp: {
-    port: Number(env('SMTP_PORT', 25)),
+    port: envNum('SMTP_PORT', 25),
     host: env('SMTP_HOST', '0.0.0.0'),
     banner: env('SMTP_BANNER', 'tempmail ready'),
-    maxMailBytes: Number(env('SMTP_MAX_MAIL_BYTES', 5 * 1024 * 1024)),
+    maxMailBytes: envNum('SMTP_MAX_MAIL_BYTES', 5 * 1024 * 1024),
+    // concurrent SMTP sessions; each may buffer up to maxMailBytes
+    maxConnections: envNum('SMTP_MAX_CONNECTIONS', 30),
+    // max seconds of inactivity while receiving DATA (smtp-server default idle timeout is 60s)
+    dataTimeoutMs: envNum('SMTP_DATA_TIMEOUT_MS', 30_000),
     // per-mailbox broadcast rate limit: mails forwarded to sockets per minute
-    ratePerMinute: Number(env('SMTP_RATE_PER_MIN', 20)),
+    ratePerMinute: envNum('SMTP_RATE_PER_MIN', 20),
     // reserved names that must never be claimed by visitors
     reservedNames: [
       'admin', 'administrator', 'postmaster', 'webmaster', 'hostmaster',

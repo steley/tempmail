@@ -30,6 +30,7 @@
   var currentMail = -1;
   var currentId = null; // last mailbox name acked by the server
   var editing = false;
+  var autoClaim = false; // true while restoring the saved mailbox on connect
 
   /* ---------- helpers ---------- */
 
@@ -188,6 +189,7 @@
     var shortid = null;
     try { shortid = localStorage.getItem('shortid'); } catch (e) {}
     if (shortid) {
+      autoClaim = true;
       socket.emit('set shortid', shortid);
     } else {
       socket.emit('request shortid', true);
@@ -199,15 +201,31 @@
   });
 
   socket.on('shortid', function (id) {
+    autoClaim = false;
     setMailAddress(id);
     setStatus('connected', 'Connected — live inbox active');
   });
 
   socket.on('shortid rejected', function (data) {
-    var reason = data && data.reason === 'reserved'
-      ? 'That name is reserved — pick another'
-      : 'Invalid name — use 1-32 letters, digits, . _ -';
-    setStatus('error', reason);
+    var wasAuto = autoClaim;
+    autoClaim = false;
+    var reason = data && data.reason;
+
+    // stale restore: saved address is now held by someone else (or a zombie
+    // socket from before the reload) — silently fall back to a fresh mailbox
+    if (reason === 'taken' && wasAuto) {
+      try { localStorage.removeItem('shortid'); } catch (e) {}
+      socket.emit('request shortid', true);
+      return;
+    }
+
+    var message =
+      reason === 'taken'
+        ? 'That address is already in use — pick another'
+        : reason === 'reserved'
+          ? 'That name is reserved — pick another'
+          : 'Invalid name — use 1-32 letters, digits, . _ -';
+    setStatus('error', message);
     // revert display to the address we actually hold (localStorage was never updated)
     try {
       var saved = localStorage.getItem('shortid');

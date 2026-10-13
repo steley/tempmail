@@ -55,6 +55,11 @@ export function attachRealtime(httpServer, mailGateway) {
         socket.emit('shortid rejected', { name: requested, reason: 'reserved' });
         return;
       }
+      if (socketsByMailbox.has(requested)) {
+        // somebody is already listening on this mailbox — no silent sharing (audit F1)
+        socket.emit('shortid rejected', { name: requested, reason: 'taken' });
+        return;
+      }
       claim(socket, requested);
       socket.emit('shortid', socket.data.mailbox);
     });
@@ -63,28 +68,31 @@ export function attachRealtime(httpServer, mailGateway) {
   });
 
   mailGateway.on('mail', (mail) => {
-    const to = String(mail.headers.to ?? '').toLowerCase();
-    const match = to.match(/([\w._-]+)@[\w._-]+/);
-    if (!match) return;
-    const targets = socketsByMailbox.get(match[1]);
-    if (!targets) return;
+    const to = String(mail.recipients ?? mail.headers.to ?? '').toLowerCase();
+    const mailboxes = new Set(); // dedupe: one mail per mailbox even with duplicate recipients
+    for (const m of to.matchAll(/([\w._-]+)@[\w._-]+/g)) mailboxes.add(m[1]);
+    if (mailboxes.size === 0) return;
+    for (const mailbox of mailboxes) {
+      const targets = socketsByMailbox.get(mailbox);
+      if (!targets) continue;
 
-    // per-mailbox sliding-window rate limit on broadcasts (abuse guard)
-    const now = Date.now();
-    let seen = rateWindow.get(match[1]);
-    if (!seen) rateWindow.set(match[1], (seen = []));
-    while (seen.length && now - seen[0] > 60_000) seen.shift();
-    if (seen.length >= config.smtp.ratePerMinute) {
-      if (!seen.warned) {
-        log.warn(`rate limit hit for "${match[1]}" — dropping further broadcasts this minute`);
-        seen.warned = true;
+      // per-mailbox sliding-window rate limit on broadcasts (abuse guard)
+      const now = Date.now();
+      let seen = rateWindow.get(mailbox);
+      if (!seen) rateWindow.set(mailbox, (seen = []));
+      while (seen.length && now - seen[0] > 60_000) seen.shift();
+      if (seen.length >= config.smtp.ratePerMinute) {
+        if (!seen.warned) {
+          log.warn(`rate limit hit for "${mailbox}" — dropping further broadcasts this minute`);
+          seen.warned = true;
+        }
+        continue;
       }
-      return;
-    }
-    seen.warned = false;
-    seen.push(now);
+      seen.warned = false;
+      seen.push(now);
 
-    for (const socket of targets) socket.emit('mail', mail);
+      for (const socket of targets) socket.emit('mail', mail);
+    }
   });
 
   return io;

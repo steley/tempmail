@@ -19,6 +19,8 @@ export function startSmtpGateway() {
     authOptional: true,
     disabledCommands: ['AUTH', 'STARTTLS'], // inbound MX traffic only; nobody authenticates, TLS unused
     size: config.smtp.maxMailBytes,
+    maxConnections: config.smtp.maxConnections, // bound memory: each session may buffer up to maxMailBytes
+    dataTimeout: config.smtp.dataTimeoutMs,     // kick sessions that stall mid-DATA
 
     onRcptTo(address, session, cb) {
       // routing happens after DATA (see onData); accept any syntactically valid recipient
@@ -67,6 +69,11 @@ export function startSmtpGateway() {
               subject: parsed.subject ?? '',
               date: parsed.date ? parsed.date.toISOString() : new Date().toISOString(),
             },
+            // route every To/Cc recipient, not just the first (audit F6)
+            recipients: [parsed.to, parsed.cc]
+              .flatMap((f) => (Array.isArray(f) ? f.map((a) => a.text) : [f?.text]))
+              .filter(Boolean)
+              .join(','),
             html: parsed.html ?? null,
             text: parsed.text ?? '',
           });

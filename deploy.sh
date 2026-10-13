@@ -1,8 +1,8 @@
 #!/bin/sh
-# tempmail 更新脚本 — 放服务器 /root/deploy.sh，chmod +x 后运行：./deploy.sh
+# tempmail update script — put at /root/deploy.sh on the server, chmod +x, run: ./deploy.sh
 set -e
 
-cd /root/tempmail   # 仓库目录，不在 /root/tempmail 就改这行
+cd /root/tempmail   # repo directory; adjust if different
 
 echo "==> git pull"
 git pull --ff-only
@@ -23,10 +23,10 @@ i=0
 until curl -fsS http://127.0.0.1:3000/healthz >/dev/null 2>&1; do
   i=$((i+1))
   if [ "$i" -ge 15 ]; then
-    echo "FAILED: healthz 未就绪，查看日志：docker logs tempmail"
+    echo "FAILED: healthz not ready — check logs: docker logs tempmail"
     exit 1
   fi
   sleep 1
 done
-echo "OK: 服务已就绪 (容器 ID: $(docker ps -qf name=tempmail))"
-echo "提醒：本次改了前端 JS，记得清 Cloudflare 缓存或强刷。"
+echo "OK: service is up (container: $(docker ps -qf name=tempmail))"
+echo "Reminder: frontend JS changed — purge Cloudflare cache or hard-refresh."

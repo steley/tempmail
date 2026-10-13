@@ -19,12 +19,22 @@ export function createWebApp() {
       'Referrer-Policy': 'no-referrer',
       'Content-Security-Policy':
         "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; " +
-        "frame-src 'self'; script-src 'self'; connect-src 'self' ws: wss:;",
+        "frame-src 'self'; script-src 'self' https://www.googletagmanager.com; " +
+        "connect-src 'self' ws: wss: https://*.google-analytics.com https://*.analytics.google.com;",
     });
     next();
   });
 
-  app.use(express.static(config.web.staticDir, { maxAge: config.web.staticMaxAgeMs }));
+  // Long immutable cache for fingerprint-able assets, revalidate-always for HTML.
+  app.use(express.static(config.web.staticDir, {
+    setHeaders: (res, filePath) => {
+      if (/\.(css|js|png|jpg|jpeg|svg|ico|webp|woff2?)$/i.test(filePath)) {
+        res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+      } else {
+        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+      }
+    },
+  }));
 
   app.get('/healthz', (req, res) => res.json({ ok: true }));
 

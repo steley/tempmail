@@ -11,7 +11,9 @@ export default {
     port: Number(env('PORT', 3000)),
     host: env('HOST', '0.0.0.0'),
     staticDir: publicDir,
-    staticMaxAgeMs: 60 * 60 * 1000,
+    // per-asset-type caching is set in src/web/app.js (long+immutable for css/js/img,
+    // must-revalidate for HTML); kept for reference/back-compat.
+    staticMaxAgeMs: 0,
   },
   smtp: {
     port: Number(env('SMTP_PORT', 25)),

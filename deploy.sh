@@ -2,7 +2,7 @@
 # tempmail update script — put at /root/deploy.sh on the server, chmod +x, run: ./deploy.sh
 set -e
 
-cd /root/tempmail   # repo directory; adjust if different
+cd /var/www/tempmail   # repo directory; adjust if different
 
 echo "==> git pull"
 git pull --ff-only

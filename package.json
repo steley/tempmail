@@ -1,5 +1,5 @@
 {
-  "name": "tempmail-v2",
+  "name": "tempmail",
   "version": "2.0.0",
   "type": "module",
   "description": "Temporary email service with live inbox over WebSocket",

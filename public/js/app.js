@@ -221,7 +221,7 @@
 
     var message =
       reason === 'taken'
-        ? 'That address is already in use — pick another'
+        ? 'That address is being used by someone else — pick another'
         : reason === 'reserved'
           ? 'That name is reserved — pick another'
           : 'Invalid name — use 1-32 letters, digits, . _ -';

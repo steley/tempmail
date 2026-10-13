@@ -16,7 +16,7 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 body {
   margin: 0;
@@ -99,6 +99,13 @@ body {
   .brand span { display: none; }
 }
 
+/* 窄屏（iPhone SE 320px 等）防导航溢出 */
+@media (max-width: 400px) {
+  .site-nav { gap: 10px; }
+  .site-nav a { font-size: 13px; }
+  .header-inner { height: 54px; }
+}
+
 /* ---------- Address card ---------- */
 main { padding-top: 28px; }
 
@@ -136,7 +143,7 @@ main { padding-top: 28px; }
   outline: none;
   background: transparent;
   color: #fff;
-  font-size: clamp(15px, 3.4vw, 21px);
+  font-size: clamp(16px, 3.4vw, 21px); /* min 16px 防 iOS 聚焦自动放大 */
   font-weight: 600;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   user-select: all;

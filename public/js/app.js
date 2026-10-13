@@ -8,6 +8,11 @@
 (function () {
   'use strict';
 
+  // activate the async-loaded prism stylesheet (CSP forbids inline onload
+  // handlers, so the media flip happens here instead)
+  var $prismCss = document.querySelector('link[href*="prism.css"]');
+  if ($prismCss) $prismCss.media = 'all';
+
   var $shortid = document.getElementById('shortid');
   var $copyBtn = document.getElementById('copyBtn');
   var $copyToast = document.getElementById('copyToast');

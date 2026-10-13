@@ -12,7 +12,9 @@ const log = createLogger('realtime');
  *   server -> client: 'shortid' (name)  |  'mail' ({ headers, html, text })
  */
 export function attachRealtime(httpServer, mailGateway) {
-  const io = new Server(httpServer, { cors: { origin: false } });
+  // serveClient=false: the client bundle ships as public/js/socket.io.min.js
+  // so it gets express's long immutable cache instead of socket.io's no-cache default
+  const io = new Server(httpServer, { cors: { origin: false }, serveClient: false });
   const socketsByMailbox = new Map(); // mailbox name -> Set<socket>
   const rateWindow = new Map();       // mailbox name -> array of broadcast timestamps
 

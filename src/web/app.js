@@ -1,6 +1,9 @@
 import express from 'express';
 import path from 'node:path';
 import config from '../config.js';
+import { createLogger } from '../lib/logger.js';
+
+const log = createLogger('web');
 
 export function createWebApp() {
   const app = express();
@@ -17,7 +20,7 @@ export function createWebApp() {
 
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
-    console.error('[web] error:', err.message);
+    log.error(`${req.method} ${req.url} -> 500:`, err.message);
     res.status(500).end();
   });
 

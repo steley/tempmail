@@ -2,8 +2,9 @@ import { SMTPServer } from 'smtp-server';
 import { simpleParser } from 'mailparser';
 import { EventEmitter } from 'node:events';
 import config from '../config.js';
+import { createLogger } from '../lib/logger.js';
 
-const log = (msg, ...rest) => console.log(`[smtp] ${msg}`, ...rest);
+const log = createLogger('smtp');
 
 /**
  * Inbound SMTP gateway. Replaces the abandoned `mailin` package.
@@ -15,7 +16,7 @@ export function startSmtpGateway() {
   const server = new SMTPServer({
     banner: config.smtp.banner,
     authOptional: true,
-    disabledCommands: ['AUTH'], // inbound MX traffic only; nobody authenticates
+    disabledCommands: ['AUTH', 'STARTTLS'], // inbound MX traffic only; nobody authenticates, TLS unused
     size: config.smtp.maxMailBytes,
 
     onRcptTo(address, session, cb) {
@@ -56,10 +57,10 @@ export function startSmtpGateway() {
             html: parsed.html ?? null,
             text: parsed.text ?? '',
           });
-          log(`accepted mail (${size} bytes) from ${session.envelope.mailFrom?.address ?? '?'}`);
+          log.info(`accepted mail (${size} bytes) from ${session.envelope.mailFrom?.address ?? '?'}`);
           cb();
         } catch (err) {
-          log('parse error:', err.message);
+      log.warn('parse error:', err.message);
           const perr = new Error('Unable to process message');
           perr.responseCode = 451;
           cb(perr);
@@ -67,18 +68,19 @@ export function startSmtpGateway() {
       });
 
       stream.on('error', (err) => {
-        log('stream error:', err.message);
+        log.warn('stream error:', err.message);
         cb(err);
       });
     },
 
     onError(err) {
-      console.error('[smtp] server error:', err.message);
+      log.error('server error:', err.message);
     },
   });
 
+  server.on('error', (err) => log.error('socket error:', err.message));
   server.listen(config.smtp.port, config.smtp.host, () => {
-    log(`listening on ${config.smtp.host}:${config.smtp.port}`);
+    log.info(`listening on ${config.smtp.host}:${config.smtp.port}`);
   });
 
   return gateway;

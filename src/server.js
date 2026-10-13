@@ -3,6 +3,16 @@ import { createWebApp } from './web/app.js';
 import { startSmtpGateway } from './smtp/gateway.js';
 import { attachRealtime } from './realtime/inbox.js';
 import config from './config.js';
+import { createLogger } from './lib/logger.js';
+
+const log = createLogger('server');
+
+process.on('uncaughtException', (err) => {
+  log.error('uncaughtException:', err.stack ?? err.message);
+});
+process.on('unhandledRejection', (reason) => {
+  log.error('unhandledRejection:', reason instanceof Error ? reason.stack : reason);
+});
 
 const webApp = createWebApp();
 const httpServer = createServer(webApp);
@@ -10,13 +20,14 @@ const mailGateway = startSmtpGateway();
 attachRealtime(httpServer, mailGateway);
 
 httpServer.listen(config.web.port, config.web.host, () => {
-  console.log(`[web] listening on ${config.web.host}:${config.web.port}`);
+  log.info(`http listening on ${config.web.host}:${config.web.port}`);
 });
 
 for (const signal of ['SIGINT', 'SIGTERM']) {
   process.on(signal, () => {
-    console.log(`\n[server] ${signal} received, shutting down`);
+    log.info(`${signal} received, shutting down`);
     httpServer.close(() => process.exit(0));
+    mailGateway.removeAllListeners?.();
     setTimeout(() => process.exit(1), 5000).unref();
   });
 }

@@ -52,7 +52,12 @@
 
   function formatDate(d) {
     var t = new Date(d);
-    return isNaN(t) ? '' : t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (isNaN(t)) return '';
+    var now = new Date();
+    var sameDay = t.getFullYear() === now.getFullYear() &&
+      t.getMonth() === now.getMonth() && t.getDate() === now.getDate();
+    if (sameDay) return t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return t.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
   function showToast() {

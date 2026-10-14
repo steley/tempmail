@@ -8,6 +8,12 @@
 (function () {
   'use strict';
 
+  // PWA: register the service worker (root pages only; the SW handles all
+  // caching itself, this is just the bootstrap)
+  if ('serviceWorker' in navigator && location.pathname === '/') {
+    navigator.serviceWorker.register('/sw.js').catch(function () { /* non-fatal */ });
+  }
+
   // activate the async-loaded prism stylesheet (CSP forbids inline onload
   // handlers, so the media flip happens here instead)
   var $prismCss = document.querySelector('link[href*="prism.css"]');

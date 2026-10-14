@@ -60,7 +60,8 @@ export function createWebApp() {
         "frame-src 'self'; " +
         "script-src 'self'" + (gaAllowed ? ' https://www.googletagmanager.com' : '') + cspExtra + '; ' +
         "connect-src 'self' ws: wss:" +
-        (gaAllowed ? ' https://*.google-analytics.com https://*.analytics.google.com' : '') + cspExtra + ';',
+        (gaAllowed ? ' https://*.google-analytics.com https://*.analytics.google.com' : '') + cspExtra + '; ' +
+        "worker-src 'self'; manifest-src 'self';",
     });
     next();
   });
@@ -71,7 +72,11 @@ export function createWebApp() {
   // Deploys change HTML content -> remember to purge the CDN cache afterwards.
   app.use(express.static(config.web.staticDir, {
     setHeaders: (res, filePath) => {
-      if (/\.(css|js|png|jpg|jpeg|svg|ico|webp|woff2?)$/i.test(filePath)) {
+      // The service worker script must revalidate on every load — a stale SW
+      // would keep serving an old app long after a deploy.
+      if (/sw\.js$/i.test(filePath)) {
+        res.setHeader('Cache-Control', 'no-cache');
+      } else if (/\.(css|js|png|jpg|jpeg|svg|ico|webp|woff2?)$/i.test(filePath)) {
         res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
       } else {
         res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=3600, must-revalidate');

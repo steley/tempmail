@@ -1,5 +1,7 @@
 # Tempmail
 
+English | [简体中文](README.zh-CN.md)
+
 Temporary email service with live inbox over WebSocket. Full rewrite of
 forsaken-mail (2015-era Node.js) with a modern, dependency-clean stack.
 

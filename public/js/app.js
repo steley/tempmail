@@ -275,7 +275,9 @@
   var socket = io({ transports: ['websocket', 'polling'] });
 
   socket.on('connect', function () {
-    setStatus('connected', 'Connected — live inbox active');
+    // don't claim "Connected" yet — the address still needs a server round
+    // trip (allocate/reclaim) before it shows up; report that honestly
+    setStatus('connecting', 'Syncing mailbox…');
     var shortid = null;
     try { shortid = localStorage.getItem('shortid'); } catch (e) {}
     if (shortid) {

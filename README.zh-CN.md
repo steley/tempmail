@@ -1,6 +1,6 @@
 # Tempmail
 
-[English](README.md) | 简体中文
+[English](README.md) | 中文
 
 基于 WebSocket 实时收件的临时邮箱服务。对 forsaken-mail（2015 年代的
 Node.js 项目）的全面重写，采用现代化、依赖干净的技术栈。

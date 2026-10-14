@@ -180,12 +180,16 @@ main { padding-top: 28px; }
   outline: none;
   background: transparent;
   color: #fff;
-  font-size: clamp(16px, 3vw, 19px); /* min 16px 防 iOS 聚焦自动放大 */
   font-weight: 600;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   user-select: all;
   padding: 2px 4px;
+  /* display state: shrink to fit long addresses on narrow screens */
+  font-size: clamp(12px, 3.6vw, 19px);
 }
+
+/* editing state: back to 16px+ so iOS doesn't zoom the focused input */
+#shortid:not([disabled]) { font-size: 16px; }
 
 #shortid::placeholder { color: rgba(255, 255, 255, .6); }
 
@@ -250,6 +254,7 @@ main { padding-top: 28px; }
 }
 
 .conn-status.connected .dot { background: #4ade80; }
+.conn-status.connecting .dot { background: #fbbf24; animation: pulse 1s ease-in-out infinite; }
 .conn-status.disconnected .dot { background: #f87171; }
 .conn-status.error .dot { background: #fbbf24; }
 
@@ -408,6 +413,11 @@ main { padding-top: 28px; }
 @keyframes pulseRing {
   0% { transform: scale(.7); opacity: .35; }
   70%, 100% { transform: scale(1.25); opacity: 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
 }
 
 .empty-title { margin: 0 0 18px; font-size: 15px; }

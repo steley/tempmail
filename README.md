@@ -3,6 +3,15 @@
 Temporary email service with live inbox over WebSocket. Full rewrite of
 forsaken-mail (2015-era Node.js) with a modern, dependency-clean stack.
 
+<p align="center">
+  <img src="docs/screenshot.png" alt="TempMail.cc — temporary email inbox with real-time delivery" width="800">
+</p>
+
+## Demo
+
+The production instance is live at **[tempmail.cc](https://tempmail.cc/)** —
+open it and a disposable inbox is ready instantly, no sign-up.
+
 ## Architecture
 
 ```

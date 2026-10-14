@@ -151,7 +151,7 @@
   }
 
   $refresh.addEventListener('click', function () {
-    socket.emit('request shortid', true);
+    socket.emit('request shortid', clientToken);
   });
 
   $edit.addEventListener('click', function () {
@@ -171,7 +171,7 @@
     editing = false;
     $shortid.setAttribute('disabled', '');
     $shortid.placeholder = 'Loading ...';
-    socket.emit('set shortid', name);   // no page reload needed; UI updates on server ack
+    socket.emit('set shortid', name, clientToken);   // no page reload needed; UI updates on server ack
   });
 
   $shortid.addEventListener('keydown', function (e) {
@@ -234,6 +234,21 @@
 
   /* ---------- socket ---------- */
 
+  // persistent per-browser token: lets the server tell "this same tab/browser
+  // reconnecting" apart from "a stranger" when reclaiming a mailbox after a
+  // transport drop — otherwise a zombie socket holds the name for ~25s and the
+  // client silently falls back to a brand-new address (the disappearing-inbox bug)
+  var clientToken = null;
+  try {
+    clientToken = localStorage.getItem('shortid_token');
+    if (!clientToken) {
+      clientToken = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : Date.now() + '-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      localStorage.setItem('shortid_token', clientToken);
+    }
+  } catch (e) { clientToken = null; /* private mode: reclaim just won't work */ }
+
   var socket = io();
 
   socket.on('connect', function () {
@@ -242,9 +257,9 @@
     try { shortid = localStorage.getItem('shortid'); } catch (e) {}
     if (shortid) {
       autoClaim = true;
-      socket.emit('set shortid', shortid);
+      socket.emit('set shortid', shortid, clientToken);
     } else {
-      socket.emit('request shortid', true);
+      socket.emit('request shortid', clientToken);
     }
   });
 

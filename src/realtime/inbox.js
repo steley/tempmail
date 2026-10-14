@@ -16,13 +16,16 @@ export function attachRealtime(httpServer, mailGateway) {
   // so it gets express's long immutable cache instead of socket.io's no-cache default
   const io = new Server(httpServer, { cors: { origin: false }, serveClient: false });
   const socketsByMailbox = new Map(); // mailbox name -> Set<socket>
+  const owners = new Map();           // mailbox name -> owner token (reconnect reclaim)
   const rateWindow = new Map();       // mailbox name -> array of broadcast timestamps
 
-  const claim = (socket, name) => {
+  const claim = (socket, name, token) => {
     release(socket);
     socket.data.mailbox = name;
+    socket.data.token = token ?? null;
     if (!socketsByMailbox.has(name)) socketsByMailbox.set(name, new Set());
     socketsByMailbox.get(name).add(socket);
+    if (token) owners.set(name, token);
   };
 
   const release = (socket) => {
@@ -33,6 +36,7 @@ export function attachRealtime(httpServer, mailGateway) {
       set.delete(socket);
       if (set.size === 0) {
         socketsByMailbox.delete(prev);
+        owners.delete(prev);
         rateWindow.delete(prev); // no listeners left — reset the rate window too
       }
     }
@@ -42,12 +46,12 @@ export function attachRealtime(httpServer, mailGateway) {
   const isReserved = (name) => config.smtp.reservedNames.includes(name);
 
   io.on('connection', (socket) => {
-    socket.on('request shortid', () => {
-      claim(socket, newMailboxName());
+    socket.on('request shortid', (token) => {
+      claim(socket, newMailboxName(), typeof token === 'string' ? token : null);
       socket.emit('shortid', socket.data.mailbox);
     });
 
-    socket.on('set shortid', (name) => {
+    socket.on('set shortid', (name, token) => {
       const requested = String(name ?? '').trim().toLowerCase();
       if (!isValidMailboxName(requested)) {
         socket.emit('shortid rejected', { name: requested, reason: 'invalid' });
@@ -58,11 +62,23 @@ export function attachRealtime(httpServer, mailGateway) {
         return;
       }
       if (socketsByMailbox.has(requested)) {
-        // somebody is already listening on this mailbox — no silent sharing (audit F1)
-        socket.emit('shortid rejected', { name: requested, reason: 'taken' });
-        return;
+        const owner = owners.get(requested);
+        if (owner && typeof token === 'string' && token === owner) {
+          // same browser reconnecting (e.g. after a transport drop) — the old
+          // socket is a zombie the server hasn't reaped yet (ping timeout up
+          // to ~25s). Kick it and let this connection take over (audit F-fix).
+          for (const stale of socketsByMailbox.get(requested)) {
+            stale.data.mailbox = null; // prevent release() from tearing down the set we're about to reuse
+            stale.disconnect(true);
+          }
+          socketsByMailbox.delete(requested);
+        } else {
+          // somebody else is listening on this mailbox — no silent sharing (audit F1)
+          socket.emit('shortid rejected', { name: requested, reason: 'taken' });
+          return;
+        }
       }
-      claim(socket, requested);
+      claim(socket, requested, typeof token === 'string' ? token : null);
       socket.emit('shortid', socket.data.mailbox);
     });
 

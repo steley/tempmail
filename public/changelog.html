@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Changelog - TempMail.cc</title>
+  <meta name="description" content="What's new on TempMail.cc — the latest improvements, fixes and features for our free temporary email service. Updated regularly.">
+  <link rel="canonical" href="https://tempmail.cc/changelog.html">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/logo.png">
+  <link rel="stylesheet" href="/css/modern.css?v=20261014d">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TempMail.cc">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Changelog - TempMail.cc">
+  <meta property="og:description" content="What's new on TempMail.cc — the latest improvements, fixes and features for our free temporary email service.">
+  <meta property="og:url" content="https://tempmail.cc/changelog.html">
+  <meta property="og:image" content="https://tempmail.cc/logo.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Changelog - TempMail.cc">
+  <meta name="twitter:description" content="What's new on TempMail.cc — the latest improvements, fixes and features for our free temporary email service.">
+  <meta name="twitter:image" content="https://tempmail.cc/logo.png">
+
+  <!-- Analytics: all tracking lives in /js/ga.js (self-hosters: replace or blank it) -->
+  <script src="/js/ga.js" defer></script>
+
+  <style>
+    .legal-page { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 40px; margin-top: 28px; box-shadow: var(--shadow); }
+    .legal-page h1 { margin: 0 0 6px; font-size: 26px; }
+    .legal-page p, .legal-page li { color: var(--text-secondary); font-size: 14.5px; }
+    .changelog-lead { margin-bottom: 26px; }
+    .changelog-date { font-size: 18px; margin: 30px 0 10px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text); }
+    .changelog-date:first-of-type { border-top: none; padding-top: 0; margin-top: 10px; }
+    .changelog-date time { color: var(--primary); font-weight: 600; }
+    .changelog-date .rel { font-size: 13px; color: var(--text-secondary); font-weight: 400; margin-left: 8px; }
+    .changelog-section ul { padding-left: 22px; margin: 8px 0; }
+    .changelog-section li { margin: 6px 0; }
+    .changelog-section b { color: var(--text); }
+    .badge { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-right: 6px; vertical-align: 1px; }
+    .badge-new { background: var(--primary-soft); color: var(--primary); }
+    .badge-fix { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+    .badge-perf { background: rgba(22, 163, 74, 0.12); color: #16a34a; }
+    @media (max-width: 640px) { .legal-page { padding: 24px 20px; } }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Changelog - TempMail.cc",
+    "url": "https://tempmail.cc/changelog.html",
+    "description": "Latest improvements, fixes and features for TempMail.cc, a free temporary email service.",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "TempMail.cc",
+      "url": "https://tempmail.cc/"
+    }
+  }
+  </script>
+</head>
+
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="brand">
+      <img src="/logo.svg" width="28" height="28" alt="TempMail.cc - Free Temporary Email Service Logo">
+      <span>TempMail<b>.cc</b></span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/changelog.html" class="active">Changelog</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/privacy.html">Privacy</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article class="legal-page">
+    <h1>What's New</h1>
+    <p class="changelog-lead">The latest improvements, fixes and features on TempMail.cc — newest first. We ship continuously; here are the changes that actually matter to you.</p>
+
+    <h2 class="changelog-date" id="2026-10-14"><time datetime="2026-10-14">October 14, 2026</time><span class="rel">today</span></h2>
+    <div class="changelog-section">
+      <ul>
+        <li><span class="badge badge-new">New</span><b>Dark mode and QR code sharing.</b> The interface now follows your system theme, and you can generate a QR code of your temporary address to scan it on another device.</li>
+        <li><span class="badge badge-new">New</span><b>Smoother first-time experience.</b> A clearer empty-inbox guide and subtle animations when new mail arrives.</li>
+        <li><span class="badge badge-perf">Perf</span><b>Faster page load.</b> Removed render-blocking scripts so your inbox is ready sooner, especially on mobile.</li>
+        <li><span class="badge badge-fix">Fix</span><b>Reliable reconnection.</b> Fixed an issue where a temporary inbox could appear to lose messages after an interrupted connection recovered.</li>
+        <li><span class="badge badge-fix">Fix</span><b>Raw source view.</b> The raw email source panel now closes correctly when clicking anywhere on the close button.</li>
+      </ul>
+    </div>
+
+    <h2 class="changelog-date" id="2026-10-13"><time datetime="2026-10-13">October 13, 2026</time></h2>
+    <div class="changelog-section">
+      <ul>
+        <li><span class="badge badge-new">New</span><b>Launch of the FAQ page.</b> Answers to the most common questions about temporary email, privacy and limits — see the <a href="/faq.html">FAQ</a>.</li>
+        <li><span class="badge badge-fix">Security</span><b>Hardened the service.</b> Added strict security headers, per-mailbox rate limiting and a full security audit pass.</li>
+        <li><span class="badge badge-fix">Fix</span><b>Clearer timestamps.</b> Emails that didn't arrive today now show the month and day instead of a bare time.</li>
+        <li><span class="badge badge-fix">Fix</span><b>Mobile layout polish.</b> Fixed several mobile display issues and cleaned up the footer.</li>
+        <li><span class="badge badge-new">For self-hosters</span><b>Docker deployment guide.</b> Complete documentation for running your own instance: clone, build, run, nginx WebSocket proxy and troubleshooting. See the <a href="/about.html">About</a> page for contact and project info.</li>
+      </ul>
+    </div>
+
+    <h2 class="changelog-date" id="launch"><time datetime="2026-10-13">Complete rewrite — October 2026</time></h2>
+    <div class="changelog-section">
+      <ul>
+        <li>TempMail.cc is a <b>complete rewrite</b> of the 2015-era forsaken-mail project: a modern, dependency-clean stack powering a free temporary email service with a real-time inbox — no registration, no password, no personal data. Messages arrive the moment they are sent and are permanently deleted when your session ends. The full source is available on <a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">GitHub</a>.</li>
+      </ul>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="https://tempmail.cc/">Home</a>
+    <a href="/about.html">About</a>
+    <a href="/faq.html">FAQ</a>
+    <a href="/changelog.html">Changelog</a>
+    <a href="/terms.html">Terms of Service</a>
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">GitHub</a>
+  </div>
+  <div class="copyright">&copy; 2026 TempMail.cc</div>
+</footer>
+</body>
+</html>

@@ -30,4 +30,4 @@ until curl -fsS http://127.0.0.1:3000/healthz >/dev/null 2>&1; do
   sleep 1
 done
 echo "OK: service is up (container: $(docker ps -qf name=tempmail))"
-echo "Reminder: frontend JS changed — purge Cloudflare cache or hard-refresh."
+echo "Reminder: HTML is edge-cached (s-maxage=3600) and frontend JS is immutable-cached — purge Cloudflare cache after deploys that change pages/JS."

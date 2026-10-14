@@ -264,7 +264,9 @@
     }
   } catch (e) { clientToken = null; /* private mode: reclaim just won't work */ }
 
-  var socket = io();
+  // try WebSocket first (saves the polling handshake round trips); fall back
+  // to polling if WS is blocked by a strict network
+  var socket = io({ transports: ['websocket', 'polling'] });
 
   socket.on('connect', function () {
     setStatus('connected', 'Connected — live inbox active');

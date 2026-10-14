@@ -65,13 +65,16 @@ export function createWebApp() {
     next();
   });
 
-  // Long immutable cache for fingerprint-able assets, revalidate-always for HTML.
+  // Long immutable cache for fingerprint-able assets. HTML revalidates in the
+  // browser (max-age=0) but is cached at the CDN edge (s-maxage) so visitors
+  // get edge hits instead of a round trip to the origin on every page view.
+  // Deploys change HTML content -> remember to purge the CDN cache afterwards.
   app.use(express.static(config.web.staticDir, {
     setHeaders: (res, filePath) => {
       if (/\.(css|js|png|jpg|jpeg|svg|ico|webp|woff2?)$/i.test(filePath)) {
         res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
       } else {
-        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+        res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=3600, must-revalidate');
       }
     },
   }));

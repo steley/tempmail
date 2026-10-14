@@ -225,7 +225,7 @@
   });
 
   $raw.addEventListener('click', function (e) {
-    if (e.target.hasAttribute && e.target.hasAttribute('data-close')) $raw.hidden = true;
+    if (e.target.closest && e.target.closest('[data-close]')) $raw.hidden = true;
   });
 
   document.addEventListener('keydown', function (e) {

@@ -2,8 +2,36 @@ import express from 'express';
 import path from 'node:path';
 import config from '../config.js';
 import { createLogger } from '../lib/logger.js';
+import { errorInfo, newRequestId } from '../lib/errors.js';
 
 const log = createLogger('web');
+
+// JSON clients (API/scripts) get a structured error body; browsers get pages.
+const wantsJson = (req) => (req.headers.accept || '').includes('application/json');
+
+function sendErrorPage(res, req, code) {
+  const info = errorInfo(code);
+  res.set('X-Error-Code', code);
+  if (wantsJson(req)) {
+    res.status(info.status).json({ ok: false, code, message: info.message });
+    return;
+  }
+  const file = code === 'E_NOT_FOUND' ? '404.html' : null;
+  if (!file) {
+    // bare 500 previously showed the browser default page — keep it minimal
+    // but at least labeled, so users can report the code
+    res.status(info.status).type('html').send(
+      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${info.status} — TempMail.cc</title>` +
+      `<body style="font:16px/1.6 system-ui,sans-serif;max-width:480px;margin:80px auto;padding:0 16px">` +
+      `<h1>${info.status}</h1><p>${info.message}</p>` +
+      `<p style="color:#888">Error code: <code>${code}</code> &middot; Request ID: <code>${res.locals.requestId}</code></p>` +
+      `<p><a href="/">Back to your inbox</a></p></body></html>`);
+    return;
+  }
+  res.status(info.status).sendFile(path.join(config.web.staticDir, file), (err) => {
+    if (err) res.status(info.status).type('html').send(`<h1>${info.status}</h1><p>Error code: ${code}</p>`);
+  });
+}
 
 export function createWebApp() {
   const app = express();
@@ -50,14 +78,14 @@ export function createWebApp() {
 
   app.get('/healthz', (req, res) => res.json({ ok: true }));
 
-  app.use((req, res) => res.status(404).sendFile(path.join(config.web.staticDir, '404.html'), (err) => {
-    if (err) res.status(404).end();
-  }));
+  app.use((req, res) => sendErrorPage(res, req, 'E_NOT_FOUND'));
 
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
-    log.error(`${req.method} ${req.url} -> 500:`, err.message);
-    res.status(500).end();
+    const requestId = newRequestId();
+    res.locals.requestId = requestId;
+    log.error(`${req.method} ${req.url} -> 500 [${requestId}]:`, err.message);
+    sendErrorPage(res, req, 'E_INTERNAL');
   });
 
   return app;

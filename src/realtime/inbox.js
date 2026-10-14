@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import config from '../config.js';
 import { newMailboxName, isValidMailboxName } from '../lib/id.js';
 import { createLogger } from '../lib/logger.js';
+import { reasonToCode, errorInfo } from '../lib/errors.js';
 
 const log = createLogger('realtime');
 
@@ -52,13 +53,17 @@ export function attachRealtime(httpServer, mailGateway) {
     });
 
     socket.on('set shortid', (name, token) => {
+      const reject = (reason) => {
+        // `reason` kept for old clients; `code` is the canonical machine code
+        socket.emit('shortid rejected', { name: String(name ?? '').trim().toLowerCase(), reason, code: reasonToCode[reason] });
+      };
       const requested = String(name ?? '').trim().toLowerCase();
       if (!isValidMailboxName(requested)) {
-        socket.emit('shortid rejected', { name: requested, reason: 'invalid' });
+        reject('invalid');
         return;
       }
       if (isReserved(requested)) {
-        socket.emit('shortid rejected', { name: requested, reason: 'reserved' });
+        reject('reserved');
         return;
       }
       if (socketsByMailbox.has(requested)) {
@@ -74,7 +79,7 @@ export function attachRealtime(httpServer, mailGateway) {
           socketsByMailbox.delete(requested);
         } else {
           // somebody else is listening on this mailbox — no silent sharing (audit F1)
-          socket.emit('shortid rejected', { name: requested, reason: 'taken' });
+          reject('taken');
           return;
         }
       }
@@ -103,6 +108,11 @@ export function attachRealtime(httpServer, mailGateway) {
         if (!seen.warned) {
           log.warn(`rate limit hit for "${mailbox}" — dropping further broadcasts this minute`);
           seen.warned = true;
+          // previously silent — users saw mails vanish with no explanation
+          const info = errorInfo('E_RATE_LIMITED');
+          for (const socket of targets) {
+            socket.emit('server error', { code: 'E_RATE_LIMITED', message: info.message });
+          }
         }
         continue;
       }

@@ -41,6 +41,21 @@
 
   /* ---------- helpers ---------- */
 
+  // canonical code -> user message; unknown codes fall back to E_INTERNAL,
+  // so the server can ship new codes without waiting for this file
+  var ERROR_MESSAGES = {
+    E_NOT_FOUND: 'The page you are looking for does not exist or has moved.',
+    E_INTERNAL: 'Something went wrong on our side. Please try again.',
+    E_RATE_LIMITED: 'Too many messages — some deliveries to this inbox were dropped for a minute.',
+    E_SHORTID_INVALID: 'Invalid name — use 1-32 letters, digits, . _ -',
+    E_SHORTID_RESERVED: 'That name is reserved — pick another',
+    E_SHORTID_TAKEN: 'That address is being used by someone else — pick another'
+  };
+
+  function messageForCode(code) {
+    return ERROR_MESSAGES[code] || ERROR_MESSAGES.E_INTERNAL;
+  }
+
   function setStatus(cls, text) {
     $statusDot.className = 'conn-status ' + cls;
     $statusText.textContent = text;
@@ -277,6 +292,7 @@
     var wasAuto = autoClaim;
     autoClaim = false;
     var reason = data && data.reason;
+    var code = (data && data.code) || null;
 
     // stale restore: saved address is now held by someone else (or a zombie
     // socket from before the reload) — silently fall back to a fresh mailbox
@@ -286,12 +302,14 @@
       return;
     }
 
-    var message =
-      reason === 'taken'
-        ? 'That address is being used by someone else — pick another'
+    // prefer the canonical code; fall back to the legacy reason field
+    var message = code
+      ? messageForCode(code)
+      : reason === 'taken'
+        ? messageForCode('E_SHORTID_TAKEN')
         : reason === 'reserved'
-          ? 'That name is reserved — pick another'
-          : 'Invalid name — use 1-32 letters, digits, . _ -';
+          ? messageForCode('E_SHORTID_RESERVED')
+          : messageForCode('E_SHORTID_INVALID');
     setStatus('error', message);
     // revert display to the address we actually hold (localStorage was never updated)
     try {
@@ -299,6 +317,13 @@
       if (saved) $shortid.value = saved + '@' + location.hostname;
       else if (currentId) $shortid.value = currentId + '@' + location.hostname;
     } catch (e) { /* private mode */ }
+  });
+
+  socket.on('server error', function (data) {
+    var code = data && data.code;
+    var text = messageForCode(code);
+    if (code) text += ' [' + code + ']';
+    setStatus('error', text);
   });
 
   socket.on('mail', function (mail) {

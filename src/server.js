@@ -22,6 +22,12 @@ const httpServer = createServer(webApp);
 const mailGateway = startSmtpGateway();
 attachRealtime(httpServer, mailGateway);
 
+// Keep origin connections alive longer than the CDN's reuse window so Cloudflare
+// edge servers reuse established TCP/TLS connections instead of re-handshaking
+// per request. headersTimeout must stay comfortably above keepAliveTimeout.
+httpServer.keepAliveTimeout = 90_000;
+httpServer.headersTimeout = 95_000;
+
 httpServer.listen(config.web.port, config.web.host, () => {
   log.info(`http listening on ${config.web.host}:${config.web.port}`);
 });

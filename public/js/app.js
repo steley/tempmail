@@ -72,8 +72,22 @@
     try { localStorage.setItem('shortid', id); } catch (e) { /* private mode */ }
     var full = id + '@' + location.hostname;
     $shortid.value = full;
+    fitAddress();
     drawQR(full);
   }
+
+  // shrink the address font until it fits the visible width (single-line
+  // input can't wrap; long hostnames overflow on narrow screens)
+  function fitAddress() {
+    if (editing || !$shortid.value) return;
+    $shortid.style.fontSize = '';
+    var size = parseFloat(getComputedStyle($shortid).fontSize);
+    while (size > 9 && $shortid.scrollWidth > $shortid.clientWidth) {
+      size -= 0.5;
+      $shortid.style.fontSize = size + 'px';
+    }
+  }
+  window.addEventListener('resize', fitAddress);
 
   /* ---------- QR code ---------- */
 
@@ -169,6 +183,7 @@
     var saved = null;
     try { saved = localStorage.getItem('shortid'); } catch (e) {}
     if (saved) $shortid.value = saved + '@' + location.hostname;
+    fitAddress();
   }
 
   $refresh.addEventListener('click', function () {
@@ -179,6 +194,7 @@
     if (!editing) {
       editing = true;
       $shortid.removeAttribute('disabled');
+      $shortid.style.fontSize = ''; // back to the 16px editing size (iOS zoom)
       $shortid.value = '';
       $shortid.placeholder = 'Enter name without @' + location.hostname;
       $shortid.focus();
@@ -326,6 +342,7 @@
       var saved = localStorage.getItem('shortid');
       if (saved) $shortid.value = saved + '@' + location.hostname;
       else if (currentId) $shortid.value = currentId + '@' + location.hostname;
+      fitAddress();
     } catch (e) { /* private mode */ }
   });
 

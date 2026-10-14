@@ -171,6 +171,8 @@ main { padding-top: 28px; }
 
 @media (max-width: 640px) {
   .address-qr { display: none; } /* 手机上扫自己的屏幕没有意义 */
+  .address-row { gap: 4px; padding: 5px; }
+  .address-row .btn-icon { width: 32px; height: 32px; }
 }
 
 #shortid {

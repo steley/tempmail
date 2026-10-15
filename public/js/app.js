@@ -53,6 +53,7 @@
     E_NOT_FOUND: 'The page you are looking for does not exist or has moved.',
     E_INTERNAL: 'Something went wrong on our side. Please try again.',
     E_RATE_LIMITED: 'Too many messages — some deliveries to this inbox were dropped for a minute.',
+    E_MAIL_TOO_BIG: 'A mail was rejected — it exceeded the size limit (attachments count).',
     E_SHORTID_INVALID: 'Invalid name — use 1-32 letters, digits, . _ -',
     E_SHORTID_RESERVED: 'That name is reserved — pick another',
     E_SHORTID_TAKEN: 'That address is being used by someone else — pick another'

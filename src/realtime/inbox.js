@@ -46,6 +46,35 @@ export function attachRealtime(httpServer, mailGateway) {
 
   const isReserved = (name) => config.smtp.reservedNames.includes(name);
 
+  // per-mailbox sliding-window rate limit (abuse guard), shared by mail
+  // broadcasts and oversize-drop notifications so a flood of either consumes
+  // the same budget
+  const broadcast = (mailbox, event, payload) => {
+    const targets = socketsByMailbox.get(mailbox);
+    if (!targets) return;
+
+    const now = Date.now();
+    let seen = rateWindow.get(mailbox);
+    if (!seen) rateWindow.set(mailbox, (seen = []));
+    while (seen.length && now - seen[0] > 60_000) seen.shift();
+    if (seen.length >= config.smtp.ratePerMinute) {
+      if (!seen.warned) {
+        log.warn(`rate limit hit for "${mailbox}" — dropping further broadcasts this minute`);
+        seen.warned = true;
+        // previously silent — users saw mails vanish with no explanation
+        const info = errorInfo('E_RATE_LIMITED');
+        for (const socket of targets) {
+          socket.emit('server error', { code: 'E_RATE_LIMITED', message: info.message });
+        }
+      }
+      return;
+    }
+    seen.warned = false;
+    seen.push(now);
+
+    for (const socket of targets) socket.emit(event, payload);
+  };
+
   io.on('connection', (socket) => {
     socket.on('request shortid', (token) => {
       claim(socket, newMailboxName(), typeof token === 'string' ? token : null);
@@ -95,31 +124,22 @@ export function attachRealtime(httpServer, mailGateway) {
     const mailboxes = new Set(); // dedupe: one mail per mailbox even with duplicate recipients
     for (const m of to.matchAll(/([\w._-]+)@[\w._-]+/g)) mailboxes.add(m[1]);
     if (mailboxes.size === 0) return;
+    for (const mailbox of mailboxes) broadcast(mailbox, 'mail', mail);
+  });
+
+  // a mail was rejected mid-DATA for exceeding the size limit; the envelope
+  // recipients are the best available address (parsed To/Cc never materialised)
+  mailGateway.on('oversize', ({ from, size, recipients }) => {
+    const to = String(recipients ?? '').toLowerCase();
+    const mailboxes = new Set();
+    for (const m of to.matchAll(/([\w._-]+)@[\w._-]+/g)) mailboxes.add(m[1]);
+    if (mailboxes.size === 0) return;
+    const info = errorInfo('E_MAIL_TOO_BIG');
     for (const mailbox of mailboxes) {
-      const targets = socketsByMailbox.get(mailbox);
-      if (!targets) continue;
-
-      // per-mailbox sliding-window rate limit on broadcasts (abuse guard)
-      const now = Date.now();
-      let seen = rateWindow.get(mailbox);
-      if (!seen) rateWindow.set(mailbox, (seen = []));
-      while (seen.length && now - seen[0] > 60_000) seen.shift();
-      if (seen.length >= config.smtp.ratePerMinute) {
-        if (!seen.warned) {
-          log.warn(`rate limit hit for "${mailbox}" — dropping further broadcasts this minute`);
-          seen.warned = true;
-          // previously silent — users saw mails vanish with no explanation
-          const info = errorInfo('E_RATE_LIMITED');
-          for (const socket of targets) {
-            socket.emit('server error', { code: 'E_RATE_LIMITED', message: info.message });
-          }
-        }
-        continue;
-      }
-      seen.warned = false;
-      seen.push(now);
-
-      for (const socket of targets) socket.emit('mail', mail);
+      broadcast(mailbox, 'server error', {
+        code: 'E_MAIL_TOO_BIG',
+        message: `${info.message} (from ${from}, ${(size / 1024 / 1024).toFixed(1)} MB)`,
+      });
     }
   });
 

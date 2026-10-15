@@ -7,9 +7,11 @@
  * alongside the legacy fields. Unknown codes fall back to E_INTERNAL on the
  * client, so new codes can ship server-side without a frontend deploy.
  *
- * Note: SMTP-layer failures are NOT here on purpose — a parse/stream error
- * happens before the recipient mailbox is reliably known, so there is no
- * user session to notify. They stay server-side logs.
+ * Note: SMTP-layer failures used to be excluded here because the recipient
+ * was only reliably known after DATA parsing. Oversize rejections now use the
+ * SMTP envelope recipients (RCPT TO), which arrive before DATA — so the
+ * recipient IS known and the user gets an E_MAIL_TOO_BIG notification.
+ * Parse/stream errors still stay server-side logs (envelope may be garbage).
  */
 
 import crypto from 'node:crypto';
@@ -27,6 +29,10 @@ export const ERROR_CODES = {
   E_RATE_LIMITED: {
     status: 429,
     message: 'Too many messages — some deliveries to this inbox were dropped for a minute.',
+  },
+  E_MAIL_TOO_BIG: {
+    status: 413,
+    message: 'A mail was rejected because it exceeded the size limit (including attachments).',
   },
 
   // shortid claim layer (Socket.IO)

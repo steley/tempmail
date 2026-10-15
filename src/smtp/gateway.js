@@ -46,6 +46,14 @@ export function startSmtpGateway() {
           tooBig = true;
           chunks.length = 0;
           stream.destroy(); // stop draining the rest of an oversized message
+          // recipient is known from the SMTP envelope (RCPT TO), which arrived
+          // before DATA — let the realtime layer notify the watching browser
+          log.warn(`rejected oversize mail (${size} bytes) from ${session.envelope.mailFrom?.address ?? '?'}`);
+          gateway.emit('oversize', {
+            from: session.envelope.mailFrom?.address ?? 'unknown',
+            size,
+            recipients: (session.envelope.rcptTo ?? []).map((r) => r.address).join(','),
+          });
           return;
         }
         chunks.push(chunk);

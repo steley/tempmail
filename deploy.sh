@@ -15,6 +15,7 @@ docker stop tempmail 2>/dev/null || true
 docker rm tempmail 2>/dev/null || true
 docker run -d --name tempmail \
   -p 25:25 -p 3000:3000 \
+  -e SMTP_MAX_MAIL_BYTES=1048576 \
   --memory 256m --pids-limit 100 \
   --restart unless-stopped \
   tempmail

@@ -35,7 +35,6 @@
     .changelog-date { font-size: 18px; margin: 30px 0 10px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text); }
     .changelog-date:first-of-type { border-top: none; padding-top: 0; margin-top: 10px; }
     .changelog-date time { color: var(--primary); font-weight: 600; }
-    .changelog-date .rel { font-size: 13px; color: var(--text-secondary); font-weight: 400; margin-left: 8px; }
     .changelog-section ul { padding-left: 22px; margin: 8px 0; }
     .changelog-section li { margin: 6px 0; }
     .changelog-section b { color: var(--text); }
@@ -85,7 +84,19 @@
     <h1>What's New</h1>
     <p class="changelog-lead">The latest improvements, fixes and features on TempMail.cc — newest first. We ship continuously; here are the changes that actually matter to you.</p>
 
-    <h2 class="changelog-date" id="2026-10-14"><time datetime="2026-10-14">October 14, 2026</time><span class="rel">today</span></h2>
+    <h2 class="changelog-date" id="2026-10-15"><time datetime="2026-10-15">October 15, 2026</time></h2>
+    <div class="changelog-section">
+      <ul>
+        <li><span class="badge badge-new">New</span><b>Install TempMail as an app.</b> The site is now a lightweight PWA — add it to your home screen and open your inbox straight from there.</li>
+        <li><span class="badge badge-new">New</span><b>Clearer error messages.</b> When something goes wrong, you'll see a short, reportable error code instead of a generic failure.</li>
+        <li><span class="badge badge-perf">Perf</span><b>Faster worldwide access.</b> Pages are now cached at the CDN edge, and the live inbox connects over WebSocket first for quicker delivery.</li>
+        <li><span class="badge badge-fix">Fix</span><b>Honest connection status.</b> The status indicator now reflects the real state of your live connection instead of guessing.</li>
+        <li><span class="badge badge-fix">Fix</span><b>Mobile address display.</b> Long temporary addresses now auto-fit on small screens instead of overflowing.</li>
+        <li><span class="badge badge-new">For self-hosters</span><b>Simplified Chinese documentation</b> is now available (<a href="https://github.com/steley/tempmail/blob/main/README.zh-CN.md" target="_blank" rel="noopener">README.zh-CN.md</a>), and the maximum accepted mail size is configurable — it now defaults to 1 MB to fit small-memory containers.</li>
+      </ul>
+    </div>
+
+    <h2 class="changelog-date" id="2026-10-14"><time datetime="2026-10-14">October 14, 2026</time></h2>
     <div class="changelog-section">
       <ul>
         <li><span class="badge badge-new">New</span><b>Dark mode and QR code sharing.</b> The interface now follows your system theme, and you can generate a QR code of your temporary address to scan it on another device.</li>

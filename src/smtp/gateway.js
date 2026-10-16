@@ -52,7 +52,7 @@ export function startSmtpGateway() {
           gateway.emit('oversize', {
             from: session.envelope.mailFrom?.address ?? 'unknown',
             size,
-            recipients: (session.envelope.rcptTo ?? []).map((r) => r.address).join(','),
+            recipients: (session.envelope.rcptTo ?? []).map((r) => r.address),
           });
           return;
         }
@@ -77,11 +77,12 @@ export function startSmtpGateway() {
               subject: parsed.subject ?? '',
               date: parsed.date ? parsed.date.toISOString() : new Date().toISOString(),
             },
-            // route every To/Cc recipient, not just the first (audit F6)
+            // structured addresses from the parser — never regex the header
+            // text: display names containing "@" (e.g. `"x@y" <real@z>`)
+            // would otherwise route mail to a stranger's mailbox (audit fix)
             recipients: [parsed.to, parsed.cc]
-              .flatMap((f) => (Array.isArray(f) ? f.map((a) => a.text) : [f?.text]))
-              .filter(Boolean)
-              .join(','),
+              .flatMap((f) => (f?.value ?? []).map((a) => a.address))
+              .filter(Boolean),
             html: parsed.html ?? null,
             text: parsed.text ?? '',
           });

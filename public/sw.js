@@ -49,6 +49,7 @@ self.addEventListener('fetch', (event) => {
   if (/\.(css|js|png|jpg|jpeg|svg|ico|webp|woff2?)$/i.test(new URL(req.url).pathname)) {
     event.respondWith(
       caches.match(req).then((hit) => hit || fetch(req).then((res) => {
+        if (!res.ok) return res; // never cache a 5xx/404 — immutable URLs have no self-heal path
         const copy = res.clone();
         caches.open(CACHE).then((cache) => cache.put(req, copy));
         return res;

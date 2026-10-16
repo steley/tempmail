@@ -342,17 +342,22 @@
       mails.shift();
       var list = $maillist.querySelectorAll('li');
       if (list.length) list[list.length - 1].remove(); // oldest is last (newest-first list)
+      // every remaining mail's index dropped by one — keep click targets in sync
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].dataset.mailIndex != null) list[i].dataset.mailIndex = +list[i].dataset.mailIndex - 1;
+      }
       if (currentMail > -1) currentMail--;
       if (currentMail < 0) closeMail();
     }
     var idx = mails.length - 1;
 
     var li = document.createElement('li');
+    li.dataset.mailIndex = idx;
     li.innerHTML =
       '<span class="from">' + escapeHtml(mail.headers && mail.headers.from) + '</span>' +
       '<span class="subject">' + escapeHtml((mail.headers && mail.headers.subject) || 'No Subject') + '</span>' +
       '<span class="time">' + escapeHtml(formatDate(mail.headers && mail.headers.date)) + '</span>';
-    li.addEventListener('click', function () { openMail(idx); });
+    li.addEventListener('click', function () { openMail(+this.dataset.mailIndex); });
     li.classList.add('new');
     li.addEventListener('animationend', function () { li.classList.remove('new'); }, { once: true });
     $maillist.prepend(li);

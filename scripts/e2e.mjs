@@ -1,20 +1,25 @@
 /**
- * End-to-end delivery test: drive the SMTP gateway with a hand-rolled
- * conversation and assert the mail reaches a live WebSocket mailbox.
+ * End-to-end tests: drive the SMTP gateway with a hand-rolled conversation
+ * and assert mail reaches (or stays away from) live WebSocket mailboxes.
  *
  * Run against a server already listening (see README "Test"):
  *   PORT=3100 SMTP_PORT=2525 npm start &
  *   node scripts/e2e.mjs
+ *
+ * Scenarios:
+ *   A. normal delivery: one recipient, mail arrives
+ *   B. display-name isolation: `To: "x@y" <real@localhost>` routes only to
+ *      real@localhost — the mailbox named after the display name must NOT
+ *      receive a copy (regression: text-regex routing leaked mail)
  */
 import { io } from 'socket.io-client';
 import { connect } from 'node:net';
 
 const WEB = process.env.E2E_WEB_URL || 'http://localhost:3100';
 const SMTP = { host: '127.0.0.1', port: Number(process.env.E2E_SMTP_PORT || 2525) };
-const MBOX = 'tester' + Date.now().toString(36);
+const TAG = Date.now().toString(36);
 
 const bail = (msg) => { console.error('FAIL:', msg); process.exit(1); };
-const deadline = setTimeout(() => bail('no mail received within 15s'), 15000);
 
 /** Minimal SMTP client: one message, then QUIT. */
 function sendMail(from, to, data) {
@@ -48,33 +53,72 @@ function sendMail(from, to, data) {
   });
 }
 
-const socket = io(WEB, { transports: ['websocket'] });
+/** Claim a mailbox; resolves the socket once the server acks the name. */
+function claim(mailbox) {
+  return new Promise((resolve, reject) => {
+    const socket = io(WEB, { transports: ['websocket'] });
+    const timer = setTimeout(() => reject(new Error(`claim timeout for ${mailbox}`)), 10000);
+    socket.on('connect_error', (e) => { clearTimeout(timer); reject(e); });
+    socket.on('shortid rejected', (d) => { clearTimeout(timer); reject(new Error(JSON.stringify(d))); });
+    socket.on('shortid', (id) => {
+      if (id === mailbox) { clearTimeout(timer); resolve(socket); }
+    });
+    socket.on('connect', () => socket.emit('set shortid', mailbox));
+  });
+}
 
-socket.on('connect_error', (e) => bail('socket connect failed: ' + e.message));
-socket.on('shortid', async (id) => {
-  console.log('registered mailbox:', id);
-  try {
-    await sendMail('sender@example.com', `${MBOX}@localhost`,
-      'Subject: Smoke test\r\nFrom: sender@example.com\r\n' +
-      `To: ${MBOX}@localhost\r\nContent-Type: text/html\r\n\r\n` +
-      '<h1>Hello v2</h1><p>it works</p>');
-    console.log('SMTP sent OK');
-  } catch (e) {
-    bail(e.message);
-  }
-});
+/** Resolve if `mailbox` receives a mail within `ms`; reject otherwise. */
+function nextMail(socket, mailbox, ms = 15000) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`no mail received on ${mailbox} within ${ms}ms`)), ms);
+    socket.once('mail', (mail) => { clearTimeout(timer); resolve(mail); });
+  });
+}
 
-socket.on('shortid rejected', (d) => bail('mailbox rejected: ' + JSON.stringify(d)));
-socket.on('mail', (mail) => {
-  clearTimeout(deadline);
-  console.log('MAIL RECEIVED:', JSON.stringify({
-    from: mail.headers.from,
-    subject: mail.headers.subject,
-    html: (mail.html || '').slice(0, 60),
-    text: mail.text.slice(0, 40),
-  }));
+async function scenarioNormal() {
+  const box = 'e2ea' + TAG;
+  const socket = await claim(box);
+  const got = nextMail(socket, box);
+  await sendMail('sender@example.com', `${box}@localhost`,
+    'Subject: Scenario A\r\nFrom: sender@example.com\r\n' +
+    `To: ${box}@localhost\r\nContent-Type: text/html\r\n\r\n` +
+    '<h1>Hello v2</h1><p>it works</p>');
+  const mail = await got;
+  if (mail.headers.subject !== 'Scenario A') bail(`A: wrong subject "${mail.headers.subject}"`);
+  console.log(`PASS A: mail delivered to ${box}`);
   socket.close();
-  process.exit(0);
-});
+}
 
-socket.on('connect', () => socket.emit('set shortid', MBOX));
+async function scenarioDisplayNameIsolation() {
+  const real = 'e2eb' + TAG;        // actual addressee
+  const decoy = 'decoy' + TAG;      // mailbox named after the display-name local part
+  const realSock = await claim(real);
+  const decoySock = await claim(decoy);
+
+  const gotReal = nextMail(realSock, real);
+  // if any mail lands here, routing still leaks through header text
+  let leaked = false;
+  decoySock.once('mail', () => { leaked = true; });
+
+  await sendMail('sender@example.com', `${real}@localhost`,
+    'Subject: Scenario B\r\nFrom: sender@example.com\r\n' +
+    `To: "leak@${decoy}.example" <${real}@localhost>\r\n` +
+    'Content-Type: text/plain\r\n\r\nsecret body');
+  await gotReal;
+
+  // give a (would-be) leak a moment to show up before declaring victory
+  await new Promise((r) => setTimeout(r, 1500));
+  if (leaked) bail(`B: display-name "leak@..." routed a copy to mailbox ${decoy}`);
+  console.log(`PASS B: display-name "${'leak@' + decoy + '.example'}" did not leak to mailbox ${decoy}`);
+  realSock.close();
+  decoySock.close();
+}
+
+try {
+  await scenarioNormal();
+  await scenarioDisplayNameIsolation();
+  console.log('ALL PASS');
+  process.exit(0);
+} catch (e) {
+  bail(e.message);
+}

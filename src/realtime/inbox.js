@@ -45,13 +45,27 @@ export function attachRealtime(httpServer, mailGateway) {
 
   const isReserved = (name) => config.smtp.reservedNames.includes(name);
 
-  // pull mailbox names out of a recipient list and keep only names the claim
-  // path would accept (same allowlist, one home — display names containing
-  // "@" must not route mail to arbitrary names)
-  const extractMailboxes = (to) => {
+  // pull mailbox names out of the recipient list and keep only names the claim
+  // path would accept. `recipients` is an array of structured addresses from
+  // mailparser/envelope — local parts only, so display names containing "@"
+  // can never route mail to an unintended mailbox. A raw header text string
+  // (defensive fallback) still goes through the old address-shaped regex.
+  const extractMailboxes = (recipients) => {
     const out = new Set();
-    for (const m of String(to ?? '').toLowerCase().matchAll(/([\w._-]+)@[\w._-]+/g)) {
-      if (isValidMailboxName(m[1])) out.add(m[1]);
+    let addrs;
+    if (Array.isArray(recipients)) {
+      addrs = recipients; // structured addresses from mailparser/envelope
+    } else {
+      // defensive fallback: raw header text — address-shaped substrings only
+      addrs = Array.from(
+        String(recipients ?? '').matchAll(/([\w._-]+)@[\w._-]+/g),
+        (m) => m[0],
+      );
+    }
+    for (const addr of addrs) {
+      if (!addr) continue;
+      const local = String(addr).split('@')[0].trim().toLowerCase();
+      if (isValidMailboxName(local)) out.add(local);
     }
     return out;
   };
@@ -71,8 +85,13 @@ export function attachRealtime(httpServer, mailGateway) {
       while (seen.length && now - seen[0] > 60_000) seen.shift();
       if (seen.length >= config.smtp.ratePerMinute) {
         if (!seen.warned) {
-          log.warn(`rate limit hit for "${mailbox}" — dropping further notifications this minute`);
           seen.warned = true;
+          log.warn(`rate limit hit for "${mailbox}" — dropping further notifications this minute`);
+          // tell the user once — silence is indistinguishable from lost mail
+          const info = errorInfo('E_RATE_LIMITED');
+          for (const socket of targets) {
+            socket.emit('server error', { code: 'E_RATE_LIMITED', message: info.message });
+          }
         }
         return;
       }

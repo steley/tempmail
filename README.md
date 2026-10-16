@@ -52,15 +52,30 @@ PORT=8080 SMTP_PORT=2525 npm start   # dev-friendly ports
 | `SMTP_RATE_PER_MIN` | 20      | per-mailbox live-broadcast rate limit |
 | `SMTP_MAX_CONN_PER_IP` | 6    | concurrent SMTP connections per client IP |
 | `SMTP_MAX_MAILS_PER_IP_MIN` | 12 | accepted mails per client IP per minute |
-| `MAIL_TTL_MINUTES` | 30       | how long mails stay in the replay buffer |
+| `MAIL_TTL_MINUTES` | 30       | how long mails stay in the replay buffer (also governs recovery-token lifetime) |
 | `MAIL_STORE_MAX_PER_MAILBOX` | 20 | mails kept per mailbox in the replay buffer |
 | `MAIL_STORE_MAX_BYTES` | 67108864 | global replay-buffer byte budget |
 | `REALTIME_MAX_BROADCASTS_SEC` | 200 | global socket-broadcast fuse (per second) |
 | `ANALYTICS_DISABLED` | (unset) | set to `1` to drop Google Analytics origins from the CSP |
 | `ANALYTICS_CSP_EXTRA` | (unset) | space-separated origins to whitelist for your own analytics provider (script-src + connect-src) |
 
-## Test
+## Recovery links
 
+After a mailbox is claimed, the server issues a high-entropy recovery token
+(64 hex chars, in-memory only) and sends it via the `recovery` socket event.
+The frontend surfaces it as a copyable `https://…/?r=TOKEN` link.
+
+- Opening `/?r=TOKEN` reclaims that mailbox — with its replay-buffered mail —
+  on any device, until the token expires.
+- Tokens live exactly as long as the replay buffer (`MAIL_TTL_MINUTES`): when
+  the mail is gone, the link is void. No persistence, no accounts.
+- The token is authoritative: a device presenting a valid token takes over the
+  mailbox and kicks current listeners. Whoever holds the link owns the inbox
+  within its TTL — treat recovery links like a password.
+- Invalid tokens are answered with `recovery rejected`; clients fall back to a
+  fresh mailbox.
+
+## Test
 ```bash
 PORT=3100 SMTP_PORT=2525 npm start &   # in one terminal
 node scripts/e2e.mjs                   # in another

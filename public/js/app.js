@@ -31,6 +31,9 @@
   var $rawContent = document.getElementById('rawContent');
   var $statusDot = document.getElementById('statusDot');
   var $statusText = document.getElementById('statusText');
+  var $recoverBtn = document.getElementById('recoverBtn');
+  var $emptyHint = document.getElementById('emptyHint');
+  var $emptyTitle = document.querySelector('.empty-title');
   var mails = [];       // keep full mail objects by index
   var currentMail = -1;
   var currentId = null; // last mailbox name acked by the server
@@ -55,6 +58,7 @@
     $shortid.value = full;
     fitAddress();
     drawQR(full);
+    resetEmptyHints();
   }
 
   // shrink the address font until it fits the visible width (single-line
@@ -195,6 +199,74 @@
     if (e.key === 'Escape') exitEdit();
   });
 
+  /* ---------- empty-state hints (staged diagnostics) ---------- */
+
+  // An empty inbox is not just "no mail yet" — as time passes without a
+  // delivery, tell the user what is most likely going on instead of leaving
+  // them refreshing blindly.
+  var hintTimer1 = null, hintTimer2 = null;
+
+  function clearEmptyHints() {
+    if (hintTimer1) { clearTimeout(hintTimer1); hintTimer1 = null; }
+    if (hintTimer2) { clearTimeout(hintTimer2); hintTimer2 = null; }
+    if ($emptyHint) { $emptyHint.hidden = true; $emptyHint.textContent = ''; }
+    if ($emptyTitle) $emptyTitle.textContent = 'Waiting for your first email…';
+  }
+
+  function resetEmptyHints() {
+    clearEmptyHints();
+    if ($maillist.children.length === 0 && $empty.style.display !== 'none') {
+      hintTimer1 = setTimeout(function () {
+        if ($maillist.children.length) return;
+        $emptyHint.textContent = 'Still nothing? Double-check the address above was copied completely — some sites take a minute or two to send.';
+        $emptyHint.hidden = false;
+      }, 20000);
+      hintTimer2 = setTimeout(function () {
+        if ($maillist.children.length) return;
+        $emptyHint.textContent = 'No mail after a few minutes? Many sites block disposable email addresses — that block happens on their side, not here. Try another site, or set a custom address.';
+        $emptyHint.hidden = false;
+      }, 60000);
+    }
+  }
+
+  /* ---------- recovery link ---------- */
+
+  // A high-entropy token the server hands out per mailbox; opening
+  // /?r=TOKEN reclaims that mailbox (with its buffered mail) until it expires.
+  var recoveryToken = null;
+  var recoveryExp = 0;
+
+  function updateRecoverBtn() {
+    var alive = recoveryToken && (!recoveryExp || recoveryExp > Date.now());
+    $recoverBtn.hidden = !alive;
+  }
+
+  function saveRecovery() {
+    try {
+      if (recoveryToken) {
+        localStorage.setItem('recovery', JSON.stringify({ token: recoveryToken, exp: recoveryExp }));
+      } else {
+        localStorage.removeItem('recovery');
+      }
+    } catch (e) { /* private mode */ }
+    updateRecoverBtn();
+  }
+
+  $recoverBtn.addEventListener('click', function () {
+    if (!recoveryToken) return;
+    var link = location.origin + '/?r=' + recoveryToken;
+    function done() { showToast(); }
+    function fallback() {
+      // clipboard API unavailable (http / old browser): prompt survives
+      window.prompt('Copy this recovery link:', link);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(done, fallback);
+    } else {
+      fallback();
+    }
+  });
+
   /* ---------- mail list & view ---------- */
 
   function openMail(idx) {
@@ -228,7 +300,7 @@
     currentMail = -1;
     var items = $maillist.querySelectorAll('li');
     for (var i = 0; i < items.length; i++) items[i].classList.remove('active');
-    if ($maillist.children.length === 0) $empty.style.display = '';
+    if ($maillist.children.length === 0) { $empty.style.display = ''; resetEmptyHints(); }
   }
 
   $closeMail.addEventListener('click', closeMail);
@@ -271,18 +343,67 @@
   // to polling if WS is blocked by a strict network
   var socket = io({ transports: ['websocket', 'polling'] });
 
+  // recovery token: ?r=TOKEN in the URL wins (link from another device /
+  // saved bookmark); otherwise fall back to the one saved in localStorage.
+  // The parameter is stripped from the address bar immediately so the user
+  // doesn't reshare a page URL containing the token.
+  var urlRecovery = null;
+  try {
+    var url = new URL(location.href);
+    urlRecovery = url.searchParams.get('r');
+    if (urlRecovery) {
+      url.searchParams.delete('r');
+      history.replaceState(null, '', url.pathname + (url.search || '') + url.hash);
+    } else {
+      var savedRec = JSON.parse(localStorage.getItem('recovery') || 'null');
+      if (savedRec && savedRec.token && (!savedRec.exp || savedRec.exp > Date.now())) {
+        recoveryToken = savedRec.token;
+        recoveryExp = savedRec.exp || 0;
+        updateRecoverBtn();
+      }
+    }
+  } catch (e) { /* malformed URL / private mode */ }
+
   socket.on('connect', function () {
     // don't claim "Connected" yet — the address still needs a server round
     // trip (allocate/reclaim) before it shows up; report that honestly
     setStatus('connecting', 'Syncing mailbox…');
     var shortid = null;
     try { shortid = localStorage.getItem('shortid'); } catch (e) {}
-    if (shortid) {
+    if (urlRecovery) {
+      // ?r= link: recover even if localStorage knows another address.
+      // Consume it — later reconnects use the stored token path instead.
+      autoClaim = true;
+      socket.emit('recover', urlRecovery, clientToken);
+      recoveryToken = urlRecovery; // shown immediately; 'recovery' event confirms with an expiry
+      urlRecovery = null;
+    } else if (shortid) {
       autoClaim = true;
       socket.emit('set shortid', shortid, clientToken);
+    } else if (recoveryToken) {
+      // storage says "fresh browser" but we still hold a live recovery token
+      autoClaim = true;
+      socket.emit('recover', recoveryToken, clientToken);
     } else {
       socket.emit('request shortid', clientToken);
     }
+  });
+
+  socket.on('recovery', function (data) {
+    if (!data || !data.token) return;
+    recoveryToken = data.token;
+    recoveryExp = data.expiresAt || 0;
+    saveRecovery();
+  });
+
+  socket.on('recovery rejected', function () {
+    // expired/invalid token — forget it and fall back to a fresh mailbox
+    urlRecovery = null;
+    recoveryToken = null;
+    recoveryExp = 0;
+    saveRecovery();
+    autoClaim = true;
+    socket.emit('request shortid', clientToken);
   });
 
   socket.on('disconnect', function () {
@@ -365,6 +486,7 @@
     li.addEventListener('animationend', function () { li.classList.remove('new'); }, { once: true });
     $maillist.prepend(li);
     $empty.style.display = 'none';
+    clearEmptyHints();
   }
 
   socket.on('mail', function (mail) { addMail(mail, true); });

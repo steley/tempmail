@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png">
   <link rel="apple-touch-icon" href="/logo.png">
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-  <link rel="stylesheet" href="/css/modern.css?v=3ed15ffc">
+  <link rel="stylesheet" href="/css/modern.css?v=recov1a">
 
   <!-- Analytics: all tracking lives in /js/ga.js (self-hosters: replace or blank it) -->
   <script src="/js/ga.js" defer></script>
@@ -82,7 +82,7 @@
             "name": "How long do emails stay?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Emails arrive in real time and are automatically and permanently deleted when you reload the page or your session expires. The mailbox is receive-only and does not support attachments or sending."
+              "text": "Emails arrive in real time and are kept for about 30 minutes after the last message, then automatically and permanently deleted. You can reopen the inbox in the same browser or via a recovery link. The mailbox is receive-only and does not support attachments or sending."
             }
           }
         ]
@@ -157,7 +157,11 @@
   <section class="inbox-card">
     <div class="inbox-head">
       <h2>Inbox</h2>
-      <span class="inbox-hint">Emails arrive here in real time · cleared when you reload</span>
+      <button id="recoverBtn" class="btn btn-ghost recover-btn" hidden title="Copy a recovery link — reopen this inbox (with its recent mail) on any device until it expires">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Recovery link
+      </button>
+      <span class="inbox-hint">Emails arrive here in real time · kept about 30 minutes, then gone for good</span>
     </div>
 
     <ul id="maillist" class="mail-list"></ul>
@@ -172,6 +176,7 @@
         <li><b>2</b><span>Paste it where you need an email</span></li>
         <li><b>3</b><span>Messages appear here instantly</span></li>
       </ol>
+      <p id="emptyHint" class="empty-hint" hidden></p>
     </div>
 
     <div id="mailcard" class="mail-view" hidden>
@@ -212,7 +217,7 @@
     <h1>Free Temporary Email Service</h1>
     <p>TempMail.cc provides a secure, anonymous, temporary email address that protects your personal inbox from spam, phishing, and unwanted marketing emails. No registration, no password, no personal data — your disposable address is ready the moment this page loads.</p>
     <ul>
-      <li>All emails are automatically deleted after reloading.</li>
+      <li>Emails are kept for about 30 minutes, then automatically and permanently deleted.</li>
       <li>Only text and HTML messages are supported. Attachments are disabled.</li>
       <li>This is a receive-only mailbox; sending emails is not available.</li>
     </ul>
@@ -221,7 +226,7 @@
     <h2>Is TempMail.cc free?</h2>
     <p>Yes, TempMail.cc is completely free. No registration, password, or personal information is required — a disposable address is generated the moment you open the page, and you can change it or set a custom one at any time.</p>
     <h2>How long do emails stay?</h2>
-    <p>Emails arrive in real time and are automatically and permanently deleted when you reload the page or your session expires. Because temporary inboxes are public by nature, anyone who knows the address can read it — never use TempMail.cc for confidential communications or important account recovery.</p>
+    <p>Emails arrive in real time and are kept for about 30 minutes after the last message, then automatically and permanently deleted. Reopen the site in the same browser and your inbox comes back with its recent mail, or copy a recovery link to reopen it on another device within that window. Because temporary inboxes are public by nature, anyone who knows the address can read it — never use TempMail.cc for confidential communications or important account recovery.</p>
     <p>Have more questions? Read the full <a href="/faq.html">FAQ</a> or learn <a href="/about.html">why we built TempMail.cc</a>.</p>
   </section>
 </main>
@@ -241,6 +246,6 @@
 
 <script src="/js/socket.io.min.js?v=20261016a" defer></script>
 <script src="/js/qrcode.min.js?v=20261016a" defer></script>
-<script src="/js/app.js?v=e1bb7a72" defer></script>
+<script src="/js/app.js?v=recov1a" defer></script>
 </body>
 </html>

@@ -674,3 +674,25 @@ main { padding-top: 28px; }
   .mail-frame { background: #fff; } /* 邮件正文多为浅色排版，iframe 保持白底 */
   .empty-steps b { background: rgba(107, 150, 255, .15); }
 }
+
+/* ---------- staged empty-state hints ---------- */
+.empty-hint {
+  margin: 14px auto 0;
+  max-width: 520px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ---------- recovery link button ---------- */
+.recover-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 9px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+.recover-btn svg { flex-shrink: 0; }

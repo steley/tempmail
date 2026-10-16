@@ -50,6 +50,16 @@ PORT=8080 SMTP_PORT=2525 npm start   # 适合本地开发的端口
 | `ANALYTICS_DISABLED` | (未设置) | 设为 `1` 时从 CSP 中移除 Google Analytics 来源 |
 | `ANALYTICS_CSP_EXTRA` | (未设置) | 以空格分隔的来源列表，为自选分析服务加白（script-src + connect-src） |
 
+## 恢复链接
+
+邮箱被认领后，服务端会签发一个高熵恢复令牌（64 位十六进制，仅存内存），通过
+`recovery` socket 事件下发；前端将其展示为可复制的 `https://…/?r=TOKEN` 链接。
+
+- 打开 `/?r=TOKEN` 即可在任意设备找回该邮箱（含缓冲期内收到的邮件），直到令牌过期。
+- 令牌生命周期与回放缓冲一致（`MAIL_TTL_MINUTES`）：邮件没了，链接也就失效。无持久化、无账户。
+- 令牌即所有权：持有效令牌的设备会接管邮箱并踢掉当前监听者。请像保管密码一样保管恢复链接。
+- 无效令牌会收到 `recovery rejected` 事件，前端自动回退到新邮箱。
+
 ## 测试
 
 ```bash

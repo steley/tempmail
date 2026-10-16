@@ -14,15 +14,48 @@ const log = createLogger('realtime');
  *   server -> client: 'shortid' (name)  |  'mail' ({ headers, html, text })
  * 2026-10 additions: 'mail history' (array of stored mails, sent once right
  * after a claim) — pure addition, old clients ignore unknown events.
+ * Recovery links: after every claim the server also emits 'recovery'
+ * { token, expiresAt }. A client that presents a live token via the
+ * 'recover' event reclaims that mailbox (kicking current listeners) — so a
+ * user can reopen the inbox on another device / after clearing storage.
+ * Tokens live exactly as long as the replay-buffer TTL: no store, no mail.
  */
 export function attachRealtime(httpServer, mailGateway) {
   // serveClient=false: the client bundle ships as public/js/socket.io.min.js
   // so it gets express's long immutable cache instead of socket.io's no-cache default
   const io = new Server(httpServer, { serveClient: false });
   const socketsByMailbox = new Map(); // mailbox name -> Set<socket>
-  const owners = new Map();           // mailbox name -> owner token (reconnect reclaim)
+  const owners = new Map();           // mailbox name -> Set<valid claim tokens>
   const rateWindow = new Map();       // mailbox name -> array of broadcast timestamps
   const store = createMailboxStore(config.store); // offline replay buffer (Phase 1)
+
+  // --- recovery tokens (in-memory, same TTL as the replay buffer) ---
+  const recByToken = new Map(); // token -> { name, expireAt }
+  const recByName = new Map();  // mailbox name -> token (stable per mailbox)
+  const recSweep = () => {
+    const now = Date.now();
+    for (const [token, rec] of recByToken) {
+      if (rec.expireAt <= now) {
+        recByName.delete(rec.name);
+        recByToken.delete(token);
+        // reclaim rights die with the token too (unless someone is live on it)
+        if (!socketsByMailbox.has(rec.name)) owners.delete(rec.name);
+      }
+    }
+  };
+  const recTimer = setInterval(recSweep, Math.max(5_000, config.store.ttlMs / 4));
+  recTimer.unref();
+
+  // one token per mailbox, reused across re-claims so a saved recovery link
+  // keeps working; a new random address simply gets its own fresh token
+  const issueRecovery = (name) => {
+    const existing = recByName.get(name);
+    if (existing && recByToken.has(existing)) return existing;
+    const token = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
+    recByToken.set(token, { name, expireAt: Date.now() + config.store.ttlMs });
+    recByName.set(name, token);
+    return token;
+  };
 
   // global broadcast fuse: an attacker spraying mail at thousands of mailbox
   // names can otherwise turn every accepted mail into N socket emits. The
@@ -48,12 +81,13 @@ export function attachRealtime(httpServer, mailGateway) {
     return true;
   };
 
-  const claim = (socket, name, token) => {
+  const claim = (socket, name, tokens) => {
     release(socket);
     socket.data.mailbox = name;
     if (!socketsByMailbox.has(name)) socketsByMailbox.set(name, new Set());
     socketsByMailbox.get(name).add(socket);
-    if (token) owners.set(name, token);
+    if (!owners.has(name)) owners.set(name, new Set());
+    for (const t of tokens) if (t) owners.get(name).add(t);
     // offline replay (Phase 1): mails that arrived while this browser was
     // disconnected are flushed once, right after the claim is acked. Old
     // clients simply ignore the unknown 'mail history' event.
@@ -69,7 +103,9 @@ export function attachRealtime(httpServer, mailGateway) {
       set.delete(socket);
       if (set.size === 0) {
         socketsByMailbox.delete(prev);
-        owners.delete(prev);
+        // NOTE: owners and the recovery token are deliberately kept — a saved
+        // recovery link must keep working after the tab closes. They are
+        // cleaned up by recSweep when the TTL expires.
         rateWindow.delete(prev); // no listeners left — reset the rate window too
       }
     }
@@ -141,8 +177,34 @@ export function attachRealtime(httpServer, mailGateway) {
 
   io.on('connection', (socket) => {
     socket.on('request shortid', (token) => {
-      claim(socket, newMailboxName(), typeof token === 'string' ? token : null);
-      socket.emit('shortid', socket.data.mailbox);
+      const name = newMailboxName();
+      claim(socket, name, [typeof token === 'string' ? token : null]);
+      socket.emit('shortid', name);
+      const rt = issueRecovery(name);
+      socket.emit('recovery', { token: rt, expiresAt: recByToken.get(rt).expireAt });
+    });
+
+    // recovery link: token holder reclaims the mailbox. The token is
+    // authoritative — current listeners (e.g. the original tab) are kicked.
+    socket.on('recover', (rawToken, clientToken) => {
+      const token = typeof rawToken === 'string' ? rawToken : '';
+      const rec = recByToken.get(token);
+      if (!rec) {
+        socket.emit('recovery rejected', { message: 'This recovery link has expired or is invalid.' });
+        return;
+      }
+      const name = rec.name;
+      if (socketsByMailbox.has(name)) {
+        for (const stale of socketsByMailbox.get(name)) {
+          stale.data.mailbox = null; // keep release() from tearing down the set we reuse
+          stale.disconnect(true);
+        }
+        socketsByMailbox.delete(name);
+      }
+      owners.delete(name); // takeover resets reclaim rights to the incoming connection
+      claim(socket, name, [token, typeof clientToken === 'string' ? clientToken : null]);
+      socket.emit('shortid', name);
+      socket.emit('recovery', { token, expiresAt: rec.expireAt });
     });
 
     socket.on('set shortid', (name, token) => {
@@ -164,7 +226,7 @@ export function attachRealtime(httpServer, mailGateway) {
       }
       if (socketsByMailbox.has(requested)) {
         const owner = owners.get(requested);
-        if (owner && typeof token === 'string' && token === owner) {
+        if (owner && typeof token === 'string' && owner.has(token)) {
           // same browser reconnecting (e.g. after a transport drop) — the old
           // socket is a zombie the server hasn't reaped yet (ping timeout up
           // to ~25s). Kick it and let this connection take over (audit F-fix).
@@ -179,8 +241,10 @@ export function attachRealtime(httpServer, mailGateway) {
           return;
         }
       }
-      claim(socket, requested, typeof token === 'string' ? token : null);
+      claim(socket, requested, [typeof token === 'string' ? token : null]);
       socket.emit('shortid', socket.data.mailbox);
+      const rt = issueRecovery(requested);
+      socket.emit('recovery', { token: rt, expiresAt: recByToken.get(rt).expireAt });
     });
 
     socket.on('disconnect', () => release(socket)); // fixed: old version leaked every dead socket

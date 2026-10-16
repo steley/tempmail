@@ -301,7 +301,7 @@
     // socket from before the reload) — silently fall back to a fresh mailbox
     if (data && data.code === 'E_SHORTID_TAKEN' && wasAuto) {
       try { localStorage.removeItem('shortid'); } catch (e) {}
-      socket.emit('request shortid', true);
+      socket.emit('request shortid', clientToken);
       return;
     }
 

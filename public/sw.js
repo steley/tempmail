@@ -17,7 +17,9 @@ const PRECACHE = [
   '/manifest.webmanifest',
   '/favicon.png',
   '/logo.png',
-  '/css/modern.css',
+  // ponytail: no modern.css here — it's versioned via ?v=, so precaching the
+  // bare URL would serve stale CSS offline forever. The runtime cache-first
+  // handler caches the versioned URL after the first online visit.
 ];
 
 self.addEventListener('install', (event) => {

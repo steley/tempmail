@@ -2,11 +2,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const env = (key, fallback) => process.env[key] ?? fallback;
-// numeric env guard: invalid values fall back instead of becoming NaN
-// (NaN would silently disable the rate limit / size cap downstream)
+// numeric env guard: invalid or negative values fall back instead of becoming
+// NaN or a silently wrong limit (NaN would disable the rate limit / size cap
+// downstream; -1 would reject or allow everything)
 const envNum = (key, fallback) => {
   const n = Number(process.env[key]);
-  return Number.isFinite(n) ? n : fallback;
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
 };
 
 // src/ -> project root/public (one level up, works both locally and in Docker /app)

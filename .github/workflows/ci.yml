@@ -55,6 +55,19 @@ jobs:
           kill "$(cat /tmp/tempmail2.pid)"
           exit $rc
 
+      - name: End-to-end SMTP delivery
+        run: |
+          SMTP_PORT=2527 PORT=3458 node src/server.js &
+          echo $! > /tmp/tempmail3.pid
+          for i in $(seq 1 20); do
+            curl -fsS --noproxy '*' http://127.0.0.1:3458/healthz && break
+            sleep 0.5
+          done
+          E2E_WEB_URL=http://127.0.0.1:3458 E2E_SMTP_PORT=2527 node scripts/e2e.mjs
+          rc=$?
+          kill "$(cat /tmp/tempmail3.pid)"
+          exit $rc
+
   docker:
     name: Docker build
     runs-on: ubuntu-latest

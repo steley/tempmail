@@ -77,6 +77,10 @@ export function createWebApp() {
       // would keep serving an old app long after a deploy.
       if (/sw\.js$/i.test(filePath)) {
         res.setHeader('Cache-Control', 'no-cache');
+      } else if (/js\/ga\.js$/i.test(filePath)) {
+        // self-hosters swap this file per the README; immutable would hide
+        // the change for 30 days with no way to bust it (HTML isn't re-edited)
+        res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=300, must-revalidate');
       } else if (/\.(css|js|png|jpg|jpeg|svg|ico|webp|woff2?)$/i.test(filePath)) {
         res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
       } else {

@@ -21,12 +21,15 @@ src/
 ├── server.js            entry point: http + express + socket.io + smtp
 ├── config.js            env-driven configuration
 ├── lib/id.js            mailbox name generation & validation (allowlist)
-├── smtp/gateway.js      inbound SMTP (smtp-server + mailparser)
+├── smtp/gateway.js      inbound SMTP (smtp-server) + per-IP abuse guards
+├── smtp/parser-worker.js MIME parsing in a worker thread (never blocks the event loop)
+├── store/mailbox-store.js in-memory replay buffer (30-min TTL) for reconnecting browsers
 ├── realtime/inbox.js    socket.io layer, mailbox -> sockets registry
 └── web/app.js           express static hosting + healthz
 public/                  frontend (vanilla JS, unchanged wire protocol)
 scripts/e2e.mjs          end-to-end delivery test
 scripts/smoke-socket.mjs realtime-layer smoke test
+scripts/hash-assets.mjs  content-fingerprint ?v= stamps in HTML before deploy
 ```
 
 ## Run
@@ -47,6 +50,12 @@ PORT=8080 SMTP_PORT=2525 npm start   # dev-friendly ports
 | `SMTP_HOST`         | 0.0.0.0 | SMTP bind address               |
 | `SMTP_MAX_MAIL_BYTES` | 5242880 | max accepted message size    |
 | `SMTP_RATE_PER_MIN` | 20      | per-mailbox live-broadcast rate limit |
+| `SMTP_MAX_CONN_PER_IP` | 6    | concurrent SMTP connections per client IP |
+| `SMTP_MAX_MAILS_PER_IP_MIN` | 12 | accepted mails per client IP per minute |
+| `MAIL_TTL_MINUTES` | 30       | how long mails stay in the replay buffer |
+| `MAIL_STORE_MAX_PER_MAILBOX` | 20 | mails kept per mailbox in the replay buffer |
+| `MAIL_STORE_MAX_BYTES` | 67108864 | global replay-buffer byte budget |
+| `REALTIME_MAX_BROADCASTS_SEC` | 200 | global socket-broadcast fuse (per second) |
 | `ANALYTICS_DISABLED` | (unset) | set to `1` to drop Google Analytics origins from the CSP |
 | `ANALYTICS_CSP_EXTRA` | (unset) | space-separated origins to whitelist for your own analytics provider (script-src + connect-src) |
 
@@ -152,6 +161,7 @@ mail UI elsewhere — MX record itself must never point at a proxy.
 
 ```bash
 git pull
+node scripts/hash-assets.mjs   # re-stamp ?v= fingerprints on changed assets
 docker rm -f tempmail
 docker build -t tempmail .
 docker run -d --name tempmail -p 3000:3000 -p 25:25 --restart unless-stopped tempmail

@@ -34,11 +34,31 @@ export default {
     dataTimeoutMs: envNum('SMTP_DATA_TIMEOUT_MS', 30_000),
     // per-mailbox broadcast rate limit: mails forwarded to sockets per minute
     ratePerMinute: envNum('SMTP_RATE_PER_MIN', 20),
+    // per-IP abuse guards: concurrent SMTP sessions and accepted mails per minute.
+    // The 30-connection global pool is shared by everyone; without per-IP caps a
+    // single host can occupy the whole pool (Phase 3 of the 2026-10 refactor).
+    maxConnPerIp: envNum('SMTP_MAX_CONN_PER_IP', 6),
+    maxMailsPerIpPerMin: envNum('SMTP_MAX_MAILS_PER_IP_MIN', 12),
     // reserved names that must never be claimed by visitors
     reservedNames: [
       'admin', 'administrator', 'postmaster', 'webmaster', 'hostmaster',
       'abuse', 'system', 'service', 'server', 'root', 'support', 'info',
       'security', 'noreply', 'no-reply', 'mail', 'mailer-daemon',
     ],
+  },
+  // offline replay buffer: mails are kept in memory so a browser that
+  // reconnects (or claims a mailbox that just received mail) still sees them
+  store: {
+    ttlMs: envNum('MAIL_TTL_MINUTES', 30) * 60_000,
+    maxMailsPerMailbox: envNum('MAIL_STORE_MAX_PER_MAILBOX', 20),
+    // global byte budget across all mailboxes; soonest-to-expire box is
+    // evicted first when exceeded (Phase 1 of the 2026-10 refactor)
+    maxTotalBytes: envNum('MAIL_STORE_MAX_BYTES', 64 * 1024 * 1024),
+  },
+  realtime: {
+    // global broadcast fuse: mail deliveries to sockets per second across all
+    // mailboxes. Protects the event loop when someone sprays mail at thousands
+    // of mailbox names at once (Phase 3 of the 2026-10 refactor).
+    maxBroadcastsPerSec: envNum('REALTIME_MAX_BROADCASTS_SEC', 200),
   },
 };

@@ -3,6 +3,7 @@ import config from '../config.js';
 import { newMailboxName, isValidMailboxName } from '../lib/id.js';
 import { createLogger } from '../lib/logger.js';
 import { errorInfo } from '../lib/errors.js';
+import { createMailboxStore } from '../store/mailbox-store.js';
 
 const log = createLogger('realtime');
 
@@ -11,6 +12,8 @@ const log = createLogger('realtime');
  * so the refreshed frontend keeps working unchanged:
  *   client -> server: 'request shortid' | 'set shortid'
  *   server -> client: 'shortid' (name)  |  'mail' ({ headers, html, text })
+ * 2026-10 additions: 'mail history' (array of stored mails, sent once right
+ * after a claim) — pure addition, old clients ignore unknown events.
  */
 export function attachRealtime(httpServer, mailGateway) {
   // serveClient=false: the client bundle ships as public/js/socket.io.min.js
@@ -19,6 +22,31 @@ export function attachRealtime(httpServer, mailGateway) {
   const socketsByMailbox = new Map(); // mailbox name -> Set<socket>
   const owners = new Map();           // mailbox name -> owner token (reconnect reclaim)
   const rateWindow = new Map();       // mailbox name -> array of broadcast timestamps
+  const store = createMailboxStore(config.store); // offline replay buffer (Phase 1)
+
+  // global broadcast fuse: an attacker spraying mail at thousands of mailbox
+  // names can otherwise turn every accepted mail into N socket emits. The
+  // fuse counts ALL broadcasts in a rolling second; over the limit they are
+  // dropped (logged, throttled). Live mail for a single quiet mailbox is
+  // unaffected — the fuse only trips under cross-mailbox floods.
+  let fuseCount = 0;
+  let fuseWindowStart = Date.now();
+  let fuseLastWarn = 0;
+  const fuseOk = () => {
+    const now = Date.now();
+    if (now - fuseWindowStart >= 1_000) {
+      fuseWindowStart = now;
+      fuseCount = 0;
+    }
+    if (++fuseCount > config.realtime.maxBroadcastsPerSec) {
+      if (now - fuseLastWarn > 5_000) {
+        fuseLastWarn = now;
+        log.warn(`global broadcast fuse tripped (> ${config.realtime.maxBroadcastsPerSec}/s) — dropping broadcasts`);
+      }
+      return false;
+    }
+    return true;
+  };
 
   const claim = (socket, name, token) => {
     release(socket);
@@ -26,6 +54,11 @@ export function attachRealtime(httpServer, mailGateway) {
     if (!socketsByMailbox.has(name)) socketsByMailbox.set(name, new Set());
     socketsByMailbox.get(name).add(socket);
     if (token) owners.set(name, token);
+    // offline replay (Phase 1): mails that arrived while this browser was
+    // disconnected are flushed once, right after the claim is acked. Old
+    // clients simply ignore the unknown 'mail history' event.
+    const history = store.take(name);
+    if (history.length) socket.emit('mail history', history);
   };
 
   const release = (socket) => {
@@ -72,11 +105,15 @@ export function attachRealtime(httpServer, mailGateway) {
 
   // per-mailbox sliding-window rate limit — throttles notification spam
   // (oversize notices) only. Real mail is NEVER dropped here: capping pushes
-  // let an attacker's junk flood hide a user's verification code while SMTP
+  // lets an attacker's junk flood hide a user's verification code while SMTP
   // still answers 250. A visible flood beats an invisible loss.
   const broadcast = (mailbox, event, payload) => {
     const targets = socketsByMailbox.get(mailbox);
     if (!targets) return;
+
+    // global fuse (Phase 3): counts every emit, mail included. Trips only
+    // under cross-mailbox floods; a single quiet mailbox never gets near it.
+    if (!fuseOk()) return;
 
     if (event !== 'mail') {
       const now = Date.now();
@@ -151,7 +188,12 @@ export function attachRealtime(httpServer, mailGateway) {
 
   mailGateway.on('mail', (mail) => {
     const mailboxes = extractMailboxes(mail.recipients ?? mail.headers.to);
-    for (const mailbox of mailboxes) broadcast(mailbox, 'mail', mail);
+    for (const mailbox of mailboxes) {
+      // store first (sync, in-memory), broadcast second — the replay buffer
+      // can never delay or break live delivery
+      store.put(mailbox, mail);
+      broadcast(mailbox, 'mail', mail);
+    }
   });
 
   // a mail was rejected mid-DATA for exceeding the size limit; the envelope

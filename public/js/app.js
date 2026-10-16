@@ -324,9 +324,10 @@
     setStatus('error', text);
   });
 
-  socket.on('mail', function (mail) {
-    // browser notification
-    if ('Notification' in window) {
+  function addMail(mail, notify) {
+    if (!mail || !mail.headers) return;
+    // browser notification (suppressed for history replay)
+    if (notify && 'Notification' in window) {
       if (Notification.permission === 'granted') {
         new Notification('New mail from ' + (mail.headers && mail.headers.from));
       } else if (Notification.permission !== 'denied') {
@@ -364,5 +365,14 @@
     li.addEventListener('animationend', function () { li.classList.remove('new'); }, { once: true });
     $maillist.prepend(li);
     $empty.style.display = 'none';
+  }
+
+  socket.on('mail', function (mail) { addMail(mail, true); });
+
+  // mails that arrived while this browser was disconnected — the server keeps
+  // a 30-minute in-memory buffer and flushes it once per claim
+  socket.on('mail history', function (list) {
+    if (!Array.isArray(list)) return;
+    for (var i = 0; i < list.length; i++) addMail(list[i], false);
   });
 })();

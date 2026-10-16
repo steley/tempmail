@@ -18,7 +18,6 @@ const PRECACHE = [
   '/favicon.png',
   '/logo.png',
   '/css/modern.css',
-  '/css/prism.css',
 ];
 
 self.addEventListener('install', (event) => {

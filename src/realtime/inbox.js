@@ -2,7 +2,7 @@ import { Server } from 'socket.io';
 import config from '../config.js';
 import { newMailboxName, isValidMailboxName } from '../lib/id.js';
 import { createLogger } from '../lib/logger.js';
-import { reasonToCode, errorInfo } from '../lib/errors.js';
+import { errorInfo } from '../lib/errors.js';
 
 const log = createLogger('realtime');
 
@@ -15,7 +15,7 @@ const log = createLogger('realtime');
 export function attachRealtime(httpServer, mailGateway) {
   // serveClient=false: the client bundle ships as public/js/socket.io.min.js
   // so it gets express's long immutable cache instead of socket.io's no-cache default
-  const io = new Server(httpServer, { cors: { origin: false }, serveClient: false });
+  const io = new Server(httpServer, { serveClient: false });
   const socketsByMailbox = new Map(); // mailbox name -> Set<socket>
   const owners = new Map();           // mailbox name -> owner token (reconnect reclaim)
   const rateWindow = new Map();       // mailbox name -> array of broadcast timestamps
@@ -23,7 +23,6 @@ export function attachRealtime(httpServer, mailGateway) {
   const claim = (socket, name, token) => {
     release(socket);
     socket.data.mailbox = name;
-    socket.data.token = token ?? null;
     if (!socketsByMailbox.has(name)) socketsByMailbox.set(name, new Set());
     socketsByMailbox.get(name).add(socket);
     if (token) owners.set(name, token);
@@ -82,17 +81,20 @@ export function attachRealtime(httpServer, mailGateway) {
     });
 
     socket.on('set shortid', (name, token) => {
-      const reject = (reason) => {
-        // `reason` kept for old clients; `code` is the canonical machine code
-        socket.emit('shortid rejected', { name: String(name ?? '').trim().toLowerCase(), reason, code: reasonToCode[reason] });
+      const reject = (code) => {
+        socket.emit('shortid rejected', {
+          name: String(name ?? '').trim().toLowerCase(),
+          code,
+          message: errorInfo(code).message,
+        });
       };
       const requested = String(name ?? '').trim().toLowerCase();
       if (!isValidMailboxName(requested)) {
-        reject('invalid');
+        reject('E_SHORTID_INVALID');
         return;
       }
       if (isReserved(requested)) {
-        reject('reserved');
+        reject('E_SHORTID_RESERVED');
         return;
       }
       if (socketsByMailbox.has(requested)) {
@@ -108,7 +110,7 @@ export function attachRealtime(httpServer, mailGateway) {
           socketsByMailbox.delete(requested);
         } else {
           // somebody else is listening on this mailbox — no silent sharing (audit F1)
-          reject('taken');
+          reject('E_SHORTID_TAKEN');
           return;
         }
       }

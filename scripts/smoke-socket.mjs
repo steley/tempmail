@@ -5,7 +5,7 @@
  * Verifies:
  *  1. 'request shortid' returns a fresh mailbox name
  *  2. same-token reconnect reclaims a claimed mailbox and kicks the old socket
- *  3. a stranger (no / wrong token) is rejected with reason 'taken'
+ *  3. a stranger (no / wrong token) is rejected with code E_SHORTID_TAKEN
  */
 import { io } from 'socket.io-client';
 
@@ -55,9 +55,9 @@ try {
   const c = io(URL, { transports: ['websocket'] });
   await connect(c);
   c.emit('set shortid', NAME);
-  check((await once(c, 'shortid rejected')).reason === 'taken', 'stranger without token rejected');
+  check((await once(c, 'shortid rejected')).code === 'E_SHORTID_TAKEN', 'stranger without token rejected');
   c.emit('set shortid', NAME, 'wrong-token');
-  check((await once(c, 'shortid rejected')).reason === 'taken', 'stranger with wrong token rejected');
+  check((await once(c, 'shortid rejected')).code === 'E_SHORTID_TAKEN', 'stranger with wrong token rejected');
 
   [a, b, c].forEach((s) => s.close());
 } catch (err) {

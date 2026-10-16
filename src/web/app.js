@@ -1,8 +1,9 @@
 import express from 'express';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import config from '../config.js';
 import { createLogger } from '../lib/logger.js';
-import { errorInfo, newRequestId } from '../lib/errors.js';
+import { errorInfo } from '../lib/errors.js';
 
 const log = createLogger('web');
 
@@ -90,7 +91,7 @@ export function createWebApp() {
 
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
-    const requestId = newRequestId();
+    const requestId = crypto.randomUUID();
     res.locals.requestId = requestId;
     log.error(`${req.method} ${req.url} -> 500 [${requestId}]:`, err.message);
     sendErrorPage(res, req, 'E_INTERNAL');

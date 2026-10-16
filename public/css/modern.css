@@ -221,6 +221,11 @@ main { padding-top: 28px; }
 
 .btn-icon:hover { background: rgba(255, 255, 255, .3); }
 
+/* copy button: swap the copy glyph for a check for 1.4s after a copy */
+.icon-check { display: none; }
+#copyBtn.copied .icon-copy { display: none; }
+#copyBtn.copied .icon-check { display: block; }
+
 .copy-toast {
   position: absolute;
   top: 18px;
@@ -602,11 +607,32 @@ main { padding-top: 28px; }
 .footer-links a { color: var(--text-secondary); text-decoration: none; font-weight: 500; }
 .footer-links a:hover { color: var(--primary); }
 
+/* ---------- Content pages (about/faq/terms/privacy/changelog/404) ---------- */
+.legal-page {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 40px;
+  margin-top: 28px;
+  box-shadow: var(--shadow);
+}
+
+.legal-page h1 { margin: 0 0 6px; font-size: 26px; }
+.legal-page h2 { font-size: 18px; margin: 30px 0 10px; padding-top: 18px; border-top: 1px solid var(--border); }
+.legal-page h2:first-of-type { border-top: none; padding-top: 0; }
+.legal-page p, .legal-page li { color: var(--text-secondary); font-size: 14.5px; }
+.legal-page ul { padding-left: 22px; margin: 8px 0; }
+.legal-page li { margin: 5px 0; }
+.legal-page b { color: var(--text); }
+
+.legal-updated { color: var(--text-secondary); font-size: 13.5px; margin-bottom: 26px; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 640px) {
   .info-grid { grid-template-columns: 1fr; }
   .address-card { padding: 20px 14px 16px; }
   .mail-frame { height: 380px; }
+  .legal-page { padding: 24px 20px; }
   .empty-steps { flex-direction: column; align-items: flex-start; gap: 10px; margin: 0 auto; width: max-content; }
   .empty-steps li + li::before { display: none; }
 }

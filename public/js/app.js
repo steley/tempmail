@@ -14,11 +14,6 @@
     navigator.serviceWorker.register('/sw.js').catch(function () { /* non-fatal */ });
   }
 
-  // activate the async-loaded prism stylesheet (CSP forbids inline onload
-  // handlers, so the media flip happens here instead)
-  var $prismCss = document.querySelector('link[href*="prism.css"]');
-  if ($prismCss) $prismCss.media = 'all';
-
   var $shortid = document.getElementById('shortid');
   var $copyBtn = document.getElementById('copyBtn');
   var $copyToast = document.getElementById('copyToast');
@@ -36,9 +31,6 @@
   var $rawContent = document.getElementById('rawContent');
   var $statusDot = document.getElementById('statusDot');
   var $statusText = document.getElementById('statusText');
-  var $copyIcon = document.getElementById('copyIcon');
-  var copyIconHTML = $copyIcon ? $copyIcon.outerHTML : '';
-
   var mails = [];       // keep full mail objects by index
   var currentMail = -1;
   var currentId = null; // last mailbox name acked by the server
@@ -47,21 +39,9 @@
 
   /* ---------- helpers ---------- */
 
-  // canonical code -> user message; unknown codes fall back to E_INTERNAL,
-  // so the server can ship new codes without waiting for this file
-  var ERROR_MESSAGES = {
-    E_NOT_FOUND: 'The page you are looking for does not exist or has moved.',
-    E_INTERNAL: 'Something went wrong on our side. Please try again.',
-    E_RATE_LIMITED: 'Too many messages — some deliveries to this inbox were dropped for a minute.',
-    E_MAIL_TOO_BIG: 'A mail was rejected — it exceeded the size limit (attachments count).',
-    E_SHORTID_INVALID: 'Invalid name — use 1-32 letters, digits, . _ -',
-    E_SHORTID_RESERVED: 'That name is reserved — pick another',
-    E_SHORTID_TAKEN: 'That address is being used by someone else — pick another'
-  };
-
-  function messageForCode(code) {
-    return ERROR_MESSAGES[code] || ERROR_MESSAGES.E_INTERNAL;
-  }
+  // user-facing text comes from the server (errors.js catalog) so there is one
+  // copy of it; this is only the fallback for a payload without a message
+  var GENERIC_ERROR = 'Something went wrong on our side. Please try again.';
 
   function setStatus(cls, text) {
     $statusDot.className = 'conn-status ' + cls;
@@ -78,14 +58,15 @@
   }
 
   // shrink the address font until it fits the visible width (single-line
-  // input can't wrap; long hostnames overflow on narrow screens)
+  // input can't wrap; long hostnames overflow on narrow screens). One pass:
+  // scale the current size by the overflow ratio instead of stepping down.
   function fitAddress() {
     if (editing || !$shortid.value) return;
     $shortid.style.fontSize = '';
     var size = parseFloat(getComputedStyle($shortid).fontSize);
-    while (size > 9 && $shortid.scrollWidth > $shortid.clientWidth) {
-      size -= 0.5;
-      $shortid.style.fontSize = size + 'px';
+    var width = $shortid.scrollWidth;
+    if (width > $shortid.clientWidth) {
+      $shortid.style.fontSize = Math.max(9, Math.floor(size * $shortid.clientWidth / width)) + 'px';
     }
   }
   window.addEventListener('resize', fitAddress);
@@ -139,17 +120,14 @@
     setTimeout(function () { $copyToast.classList.remove('show'); }, 1400);
   }
 
-  // 复制成功后图标短暂变 ✓，1.4s 后还原
+  // 复制成功后短暂显示 ✓（两个图标都在 HTML 里，切换 class 即可）
   var iconTimer = null;
   function flashCopyIcon() {
-    if (!$copyIcon) return;
+    var btn = $copyBtn;
     if (iconTimer) clearTimeout(iconTimer);
-    $copyIcon.outerHTML =
-      '<svg id="copyIcon" class="copy-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-    $copyIcon = document.getElementById('copyIcon');
+    btn.classList.add('copied');
     iconTimer = setTimeout(function () {
-      $copyIcon.outerHTML = copyIconHTML;
-      $copyIcon = document.getElementById('copyIcon');
+      btn.classList.remove('copied');
       iconTimer = null;
     }, 1400);
   }
@@ -318,26 +296,17 @@
   socket.on('shortid rejected', function (data) {
     var wasAuto = autoClaim;
     autoClaim = false;
-    var reason = data && data.reason;
-    var code = (data && data.code) || null;
 
     // stale restore: saved address is now held by someone else (or a zombie
     // socket from before the reload) — silently fall back to a fresh mailbox
-    if (reason === 'taken' && wasAuto) {
+    if (data && data.code === 'E_SHORTID_TAKEN' && wasAuto) {
       try { localStorage.removeItem('shortid'); } catch (e) {}
       socket.emit('request shortid', true);
       return;
     }
 
-    // prefer the canonical code; fall back to the legacy reason field
-    var message = code
-      ? messageForCode(code)
-      : reason === 'taken'
-        ? messageForCode('E_SHORTID_TAKEN')
-        : reason === 'reserved'
-          ? messageForCode('E_SHORTID_RESERVED')
-          : messageForCode('E_SHORTID_INVALID');
-    setStatus('error', message);
+    // message text is the server's (single source of truth)
+    setStatus('error', (data && data.message) || GENERIC_ERROR);
     // revert display to the address we actually hold (localStorage was never updated)
     try {
       var saved = localStorage.getItem('shortid');
@@ -348,9 +317,8 @@
   });
 
   socket.on('server error', function (data) {
-    var code = data && data.code;
-    var text = messageForCode(code);
-    if (code) text += ' [' + code + ']';
+    var text = (data && data.message) || GENERIC_ERROR;
+    if (data && data.code) text += ' [' + data.code + ']';
     setStatus('error', text);
   });
 

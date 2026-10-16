@@ -26,6 +26,7 @@ src/
 └── web/app.js           express 静态托管 + healthz
 public/                  前端（原生 JS，协议保持不变）
 scripts/e2e.mjs          端到端投递测试
+scripts/smoke-socket.mjs 实时层冒烟测试
 ```
 
 ## 运行
@@ -54,6 +55,7 @@ PORT=8080 SMTP_PORT=2525 npm start   # 适合本地开发的端口
 ```bash
 PORT=3100 SMTP_PORT=2525 npm start &   # 终端一
 node scripts/e2e.mjs                   # 终端二
+SMOKE_URL=http://127.0.0.1:3100 node scripts/smoke-socket.mjs   # 终端二：实时层冒烟测试
 ```
 
 ## 站点统计

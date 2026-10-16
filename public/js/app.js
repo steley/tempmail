@@ -250,18 +250,20 @@
 
   /* ---------- socket ---------- */
 
-  // persistent per-browser token: lets the server tell "this same tab/browser
-  // reconnecting" apart from "a stranger" when reclaiming a mailbox after a
-  // transport drop — otherwise a zombie socket holds the name for ~25s and the
-  // client silently falls back to a brand-new address (the disappearing-inbox bug)
+  // per-tab claim token, kept in sessionStorage (NOT localStorage):
+  // two tabs sharing one token would each auto-claim the same address on
+  // reconnect and kick each other in an endless reconnect loop. sessionStorage
+  // still survives reloads and tab restores — the case the token exists for.
+  // After a full browser restart the mailbox is free anyway (the server reaps
+  // dead sockets in ~25s), so a per-tab token loses nothing.
   var clientToken = null;
   try {
-    clientToken = localStorage.getItem('shortid_token');
+    clientToken = sessionStorage.getItem('shortid_token');
     if (!clientToken) {
       clientToken = (window.crypto && crypto.randomUUID)
         ? crypto.randomUUID()
         : Date.now() + '-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
-      localStorage.setItem('shortid_token', clientToken);
+      sessionStorage.setItem('shortid_token', clientToken);
     }
   } catch (e) { clientToken = null; /* private mode: reclaim just won't work */ }
 

@@ -4,9 +4,13 @@ import { fileURLToPath } from 'node:url';
 const env = (key, fallback) => process.env[key] ?? fallback;
 // numeric env guard: invalid or negative values fall back instead of becoming
 // NaN or a silently wrong limit (NaN would disable the rate limit / size cap
-// downstream; -1 would reject or allow everything)
+// downstream; -1 would reject or allow everything). An empty string would
+// otherwise become 0 via Number('') === 0 — e.g. SMTP_PORT= would listen on a
+// random port instead of the documented default.
 const envNum = (key, fallback) => {
-  const n = Number(process.env[key]);
+  const raw = process.env[key];
+  if (raw === undefined || raw.trim() === '') return fallback;
+  const n = Number(raw);
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 };
 

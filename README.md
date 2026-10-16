@@ -26,6 +26,7 @@ src/
 └── web/app.js           express static hosting + healthz
 public/                  frontend (vanilla JS, unchanged wire protocol)
 scripts/e2e.mjs          end-to-end delivery test
+scripts/smoke-socket.mjs realtime-layer smoke test
 ```
 
 ## Run
@@ -54,6 +55,7 @@ PORT=8080 SMTP_PORT=2525 npm start   # dev-friendly ports
 ```bash
 PORT=3100 SMTP_PORT=2525 npm start &   # in one terminal
 node scripts/e2e.mjs                   # in another
+SMOKE_URL=http://127.0.0.1:3100 node scripts/smoke-socket.mjs   # realtime-layer smoke test
 ```
 
 ## Analytics

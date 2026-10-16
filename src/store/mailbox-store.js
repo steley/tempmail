@@ -21,6 +21,7 @@ export function createMailboxStore({ ttlMs, maxMailsPerMailbox, maxTotalBytes })
   // mailbox name -> { mails: [], bytes, expireAt }
   const boxes = new Map();
   let totalBytes = 0;
+  let nextMailId = 1; // process-wide unique id for manual delete round-trips
 
   const byteSize = (mail) =>
     (mail.text?.length ?? 0) + (mail.html?.length ?? 0) +
@@ -52,6 +53,9 @@ export function createMailboxStore({ ttlMs, maxMailsPerMailbox, maxTotalBytes })
   const put = (name, mail) => {
     let box = boxes.get(name);
     if (!box) boxes.set(name, (box = { mails: [], bytes: 0, expireAt: 0 }));
+    // id is assigned here (store is the single source of truth) so live
+    // broadcasts and history replays carry the same id
+    mail._id = nextMailId++;
     const size = byteSize(mail);
 
     while (box.mails.length >= maxMailsPerMailbox) dropOldestMail(box);
@@ -73,6 +77,21 @@ export function createMailboxStore({ ttlMs, maxMailsPerMailbox, maxTotalBytes })
     return box ? box.mails.slice() : [];
   };
 
+  // manual delete: remove one mail by its store-assigned id.
+  // Returns true if it was found and removed. The box keeps its original
+  // TTL — deleting the last mail does not extend the mailbox's lifetime.
+  const removeMail = (name, mailId) => {
+    const box = boxes.get(name);
+    if (!box || !Number.isInteger(mailId)) return false;
+    const i = box.mails.findIndex((m) => m._id === mailId);
+    if (i === -1) return false;
+    const size = byteSize(box.mails[i]);
+    box.mails.splice(i, 1);
+    box.bytes -= size;
+    totalBytes -= size;
+    return true;
+  };
+
   const sweep = () => {
     const now = Date.now();
     for (const [name, box] of boxes) {
@@ -85,6 +104,7 @@ export function createMailboxStore({ ttlMs, maxMailsPerMailbox, maxTotalBytes })
   return {
     put,
     take,
+    removeMail,
     sweep,
     stats: () => ({ mailboxes: boxes.size, bytes: totalBytes }),
     close: () => clearInterval(timer),

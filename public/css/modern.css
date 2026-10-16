@@ -504,6 +504,8 @@ main { padding-top: 28px; }
 
 .btn-ghost:hover { color: var(--primary); background: var(--primary-soft); }
 
+.btn-ghost.btn-danger:hover { color: #dc2626; background: rgba(220, 38, 38, 0.08); }
+
 .mail-frame {
   display: block;
   width: 100%;

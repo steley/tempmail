@@ -26,6 +26,7 @@
   var $mailFrom = document.getElementById('mailFrom');
   var $mailFrame = document.getElementById('mailFrame');
   var $viewRaw = document.getElementById('viewRaw');
+  var $deleteMail = document.getElementById('deleteMail');
   var $closeMail = document.getElementById('closeMail');
   var $raw = document.getElementById('raw');
   var $rawContent = document.getElementById('rawContent');
@@ -34,11 +35,21 @@
   var $recoverBtn = document.getElementById('recoverBtn');
   var $emptyHint = document.getElementById('emptyHint');
   var $emptyTitle = document.querySelector('.empty-title');
-  var mails = [];       // keep full mail objects by index
-  var currentMail = -1;
+  var mails = [];       // keep full mail objects (each has a store-assigned _id)
+  var currentMailId = null; // _id of the mail open in the viewer
   var currentId = null; // last mailbox name acked by the server
   var editing = false;
   var autoClaim = false; // true while restoring the saved mailbox on connect
+  var localId = 0;      // fallback ids for mails that arrive without one
+
+  // find a mail's array index by its id
+  function idxOf(id) {
+    if (id == null) return -1;
+    for (var i = 0; i < mails.length; i++) {
+      if (mails[i]._id === id) return i;
+    }
+    return -1;
+  }
 
   /* ---------- helpers ---------- */
 
@@ -269,35 +280,44 @@
 
   /* ---------- mail list & view ---------- */
 
-  function openMail(idx) {
+  function openMail(id) {
+    var idx = idxOf(id);
     var mail = mails[idx];
     if (!mail) return;
-    currentMail = idx;
+    currentMailId = id;
     $mailSubject.textContent = (mail.headers && mail.headers.subject) || 'No Subject';
     $mailFrom.textContent = 'From: ' + ((mail.headers && mail.headers.from) || 'unknown') +
       ' · ' + formatDate(mail.headers && mail.headers.date);
+
+    // unhide BEFORE loading content: WebKit does not render documents that
+    // start loading inside a display:none subtree — the card must be visible
+    // when the iframe navigation begins
+    $mailcard.hidden = false;
+    $empty.style.display = 'none';
+    $mailcard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
     // render inside a sandboxed iframe: scripts/plugins blocked
     var html = mail.html || ('<pre style="white-space:pre-wrap;font:13px/1.5 monospace;padding:16px;">' +
       escapeHtml(mail.text || '(empty message)') + '</pre>');
     $mailFrame.setAttribute('sandbox', 'allow-popups'); // deliberately no allow-scripts
+    // force a real navigation: WebKit (Safari) shows a BLANK document when
+    // srcdoc is (re-)assigned on an iframe that was display:none — e.g. after
+    // collapse/reopen or while the card was hidden. removeAttribute makes the
+    // next srcdoc assignment always a fresh load, on every engine.
+    $mailFrame.removeAttribute('srcdoc');
     $mailFrame.srcdoc = '<!DOCTYPE html><html><head><meta charset="utf-8">' +
       '<base target="_blank"><style>body{font:14px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#17202a;margin:16px;word-break:break-word}img{max-width:100%}</style>' +
       '</head><body>' + html + '</body></html>';
 
-    $mailcard.hidden = false;
-    $empty.style.display = 'none';
-    $mailcard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
     var items = $maillist.querySelectorAll('li');
     for (var i = 0; i < items.length; i++) {
-      items[i].classList.toggle('active', items.length - 1 - i === idx); // list is newest-first
+      items[i].classList.toggle('active', +items[i].dataset.mailId === id); // list is newest-first
     }
   }
 
   function closeMail() {
     $mailcard.hidden = true;
-    currentMail = -1;
+    currentMailId = null;
     var items = $maillist.querySelectorAll('li');
     for (var i = 0; i < items.length; i++) items[i].classList.remove('active');
     if ($maillist.children.length === 0) { $empty.style.display = ''; resetEmptyHints(); }
@@ -306,10 +326,20 @@
   $closeMail.addEventListener('click', closeMail);
 
   $viewRaw.addEventListener('click', function () {
-    if (currentMail < 0 || !mails[currentMail]) return;
-    $rawContent.textContent = JSON.stringify(mails[currentMail], null, 2);
+    var idx = idxOf(currentMailId);
+    if (idx < 0 || !mails[idx]) return;
+    $rawContent.textContent = JSON.stringify(mails[idx], null, 2);
     $raw.hidden = false;
     if (window.Prism) Prism.highlightElement($rawContent);
+  });
+
+  // manual delete: ask the server (which owns the replay buffer) to remove
+  // this mail; every tab on the mailbox removes it on 'mail deleted'
+  $deleteMail.addEventListener('click', function () {
+    if (currentMailId == null) return;
+    socket.emit('delete mail', currentMailId, function (res) {
+      if (!res || !res.ok) setStatus('error', 'Could not delete this email. Please try again.');
+    });
   });
 
   $raw.addEventListener('click', function (e) {
@@ -416,6 +446,24 @@
     setStatus('connected', 'Connected — live inbox active');
   });
 
+  // server instance id, sent with every claim. A change means the server was
+  // restarted: its in-memory store (and mail ids) are gone, so keep no local
+  // state that references the previous generation — otherwise id collisions
+  // with the fresh store would break opens and deletes.
+  var serverBoot = null;
+  socket.on('boot', function (data) {
+    var id = data && data.id;
+    if (!id) return;
+    if (serverBoot && serverBoot !== id) {
+      mails = [];
+      currentMailId = null;
+      $mailcard.hidden = true;
+      $maillist.innerHTML = '';
+      if ($maillist.children.length === 0) { $empty.style.display = ''; resetEmptyHints(); }
+    }
+    serverBoot = id;
+  });
+
   socket.on('shortid rejected', function (data) {
     var wasAuto = autoClaim;
     autoClaim = false;
@@ -447,6 +495,12 @@
 
   function addMail(mail, notify) {
     if (!mail || !mail.headers) return;
+    // id safety net: a server restarted under this open tab assigns fresh ids
+    // and mails kept from before the restart have none — give them a local
+    // one so they stay openable (server-side delete just won't find them)
+    if (mail._id == null) mail._id = 'c' + (++localId);
+    // dedup: a reconnect replays 'mail history' — don't add the same mail twice
+    if (idxOf(mail._id) !== -1) return;
     // browser notification (suppressed for history replay)
     if (notify && 'Notification' in window) {
       if (Notification.permission === 'granted') {
@@ -466,22 +520,21 @@
       mails.shift();
       var list = $maillist.querySelectorAll('li');
       if (list.length) list[list.length - 1].remove(); // oldest is last (newest-first list)
-      // every remaining mail's index dropped by one — keep click targets in sync
-      for (var i = 0; i < list.length; i++) {
-        if (list[i].dataset.mailIndex != null) list[i].dataset.mailIndex = +list[i].dataset.mailIndex - 1;
-      }
-      if (currentMail > -1) currentMail--;
-      if (currentMail < 0) closeMail();
     }
-    var idx = mails.length - 1;
+    // li carries the store-assigned _id, not an index — deletes never shift ids
 
     var li = document.createElement('li');
-    li.dataset.mailIndex = idx;
+    li.dataset.mailId = mail._id;
     li.innerHTML =
       '<span class="from">' + escapeHtml(mail.headers && mail.headers.from) + '</span>' +
       '<span class="subject">' + escapeHtml((mail.headers && mail.headers.subject) || 'No Subject') + '</span>' +
       '<span class="time">' + escapeHtml(formatDate(mail.headers && mail.headers.date)) + '</span>';
-    li.addEventListener('click', function () { openMail(+this.dataset.mailIndex); });
+    li.addEventListener('click', function () {
+      // toggle: clicking the open mail collapses it, otherwise open it
+      var id = +this.dataset.mailId;
+      if (currentMailId === id && !$mailcard.hidden) closeMail();
+      else openMail(id);
+    });
     li.classList.add('new');
     li.addEventListener('animationend', function () { li.classList.remove('new'); }, { once: true });
     $maillist.prepend(li);
@@ -490,6 +543,21 @@
   }
 
   socket.on('mail', function (mail) { addMail(mail, true); });
+
+  // a mail was removed (manual delete) — sync every open tab on the mailbox
+  socket.on('mail deleted', function (data) {
+    var id = data && data.id;
+    var idx = idxOf(id);
+    if (idx === -1) return;
+    mails.splice(idx, 1);
+    var li = $maillist.querySelector('li[data-mail-id="' + id + '"]');
+    if (li) li.remove();
+    if (currentMailId === id) closeMail();
+    if ($maillist.children.length === 0 && $mailcard.hidden) {
+      $empty.style.display = '';
+      resetEmptyHints();
+    }
+  });
 
   // mails that arrived while this browser was disconnected — the server keeps
   // a 30-minute in-memory buffer and flushes it once per claim

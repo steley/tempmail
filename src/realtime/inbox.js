@@ -24,6 +24,10 @@ export function attachRealtime(httpServer, mailGateway) {
   // serveClient=false: the client bundle ships as public/js/socket.io.min.js
   // so it gets express's long immutable cache instead of socket.io's no-cache default
   const io = new Server(httpServer, { serveClient: false });
+  // per-process id: lets the client detect a server restart (in-memory store
+  // is gone, mail ids restart from 1) and reset its list instead of mixing
+  // mails from two different store generations
+  const bootId = crypto.randomUUID();
   const socketsByMailbox = new Map(); // mailbox name -> Set<socket>
   const owners = new Map();           // mailbox name -> Set<valid claim tokens>
   const rateWindow = new Map();       // mailbox name -> array of broadcast timestamps
@@ -91,6 +95,7 @@ export function attachRealtime(httpServer, mailGateway) {
     // offline replay (Phase 1): mails that arrived while this browser was
     // disconnected are flushed once, right after the claim is acked. Old
     // clients simply ignore the unknown 'mail history' event.
+    socket.emit('boot', { id: bootId });
     const history = store.take(name);
     if (history.length) socket.emit('mail history', history);
   };
@@ -151,7 +156,9 @@ export function attachRealtime(httpServer, mailGateway) {
     // under cross-mailbox floods; a single quiet mailbox never gets near it.
     if (!fuseOk()) return;
 
-    if (event !== 'mail') {
+    // rate limit only machine-generated notifications ('mail deleted' is
+    // user-driven — throttling it would desync open tabs)
+    if (event !== 'mail' && event !== 'mail deleted') {
       const now = Date.now();
       let seen = rateWindow.get(mailbox);
       if (!seen) rateWindow.set(mailbox, (seen = []));
@@ -248,6 +255,19 @@ export function attachRealtime(httpServer, mailGateway) {
     });
 
     socket.on('disconnect', () => release(socket)); // fixed: old version leaked every dead socket
+
+    // manual delete: the client asks to remove one mail from its own mailbox's
+    // replay buffer. Scoped to socket.data.mailbox, so a socket can never touch
+    // another mailbox's mail. On success everyone listening on the mailbox gets
+    // 'mail deleted' so every open tab stays in sync.
+    socket.on('delete mail', (mailId, ack) => {
+      const done = typeof ack === 'function' ? ack : () => {};
+      const name = socket.data.mailbox;
+      if (!name || !Number.isInteger(mailId)) { done({ ok: false }); return; }
+      const ok = store.removeMail(name, mailId);
+      if (ok) broadcast(name, 'mail deleted', { id: mailId });
+      done({ ok });
+    });
   });
 
   mailGateway.on('mail', (mail) => {

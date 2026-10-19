@@ -56,8 +56,6 @@
       <a href="/about.html">About</a>
       <a href="/faq.html">FAQ</a>
       <a href="/changelog.html" class="active">Changelog</a>
-      <a href="/terms.html">Terms</a>
-      <a href="/privacy.html">Privacy</a>
     </nav>
   </div>
 </header>
@@ -66,6 +64,15 @@
   <article class="legal-page">
     <h1>What's New</h1>
     <p class="changelog-lead">The latest improvements, fixes and features on TempMail.cc — newest first. We ship continuously; here are the changes that actually matter to you.</p>
+
+    <h2 class="changelog-date" id="2026-10-19"><time datetime="2026-10-19">October 19, 2026</time></h2>
+    <div class="changelog-section">
+      <ul>
+        <li><span class="badge badge-new">New</span><b>Delete mail manually.</b> You can now delete a message yourself instead of waiting for it to expire, and the mail view collapses cleanly to keep a long inbox tidy.</li>
+        <li><span class="badge badge-fix">Fix</span><b>Leaner navigation.</b> Removed the Terms and Privacy links from the page navigation — they remain available in the footer.</li>
+        <li><span class="badge badge-new">For self-hosters</span><b>Stricter defaults.</b> The web port now binds to loopback only (use a reverse proxy for public access), and the per-IP mail rate limit was raised to 24 mails per minute via <code>SMTP_MAX_MAILS_PER_IP_MIN</code>.</li>
+      </ul>
+    </div>
 
     <h2 class="changelog-date" id="2026-10-16"><time datetime="2026-10-16">October 16, 2026</time></h2>
     <div class="changelog-section">

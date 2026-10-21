@@ -68,7 +68,7 @@
     var full = id + '@' + location.hostname;
     $shortid.value = full;
     fitAddress();
-    drawQR(full);
+    refreshQR(full);
     resetEmptyHints();
   }
 
@@ -86,14 +86,46 @@
   }
   window.addEventListener('resize', fitAddress);
 
-  /* ---------- QR code ---------- */
+  /* ---------- QR code (loaded only when it can be seen) ---------- */
 
-  function drawQR(text) {
+  // The QR exists to hand the address to a phone, so .address-qr is hidden
+  // below 641px (modern.css). Phones are the majority of traffic, and for them
+  // 20 KB of encoder plus a render buys nothing — the library used to download
+  // and run even when the canvas could not be displayed. Now it stays off the
+  // wire until the canvas can actually render, and even then only when idle.
+  var QR_MIN_WIDTH = '(min-width: 641px)'; // keep in sync with .address-qr
+  var qrText = '';
+  var qrDrawn = false;
+  var qrLib = 'idle'; // idle | loading | ready | failed
+
+  function qrVisible() {
+    return window.matchMedia ? window.matchMedia(QR_MIN_WIDTH).matches : true;
+  }
+
+  function whenIdle(fn) {
+    if (window.requestIdleCallback) window.requestIdleCallback(fn, { timeout: 2000 });
+    else setTimeout(fn, 200);
+  }
+
+  function loadQrLib(then) {
+    if (qrLib === 'ready') return then();
+    if (qrLib === 'loading' || qrLib === 'failed') return;
+    qrLib = 'loading';
+    var s = document.createElement('script');
+    s.async = true;
+    // vendored build, frozen: bump the stamp only if the file itself changes
+    s.src = '/js/qrcode.min.js?v=20261016a';
+    s.onload = function () { qrLib = 'ready'; then(); };
+    s.onerror = function () { qrLib = 'failed'; };
+    document.head.appendChild(s);
+  }
+
+  function drawQR() {
     var canvas = document.getElementById('qrCanvas');
-    if (!canvas || !window.qrcode || !text) return;
+    if (!canvas || !window.qrcode || !qrText) return;
     try {
       var qr = window.qrcode(0, 'M');
-      qr.addData(text);
+      qr.addData(qrText);
       qr.make();
       var ctx = canvas.getContext('2d');
       var count = qr.getModuleCount();
@@ -111,8 +143,21 @@
           if (qr.isDark(r, c)) ctx.fillRect(offset + c * scale, offset + r * scale, scale, scale);
         }
       }
+      qrDrawn = true;
     } catch (e) { /* QR 失败不影响主功能 */ }
   }
+
+  function refreshQR(text) {
+    if (text !== undefined) qrText = text || '';
+    if (!qrText || !qrVisible()) return;
+    whenIdle(function () {
+      if (!qrVisible()) return;
+      loadQrLib(drawQR);
+    });
+  }
+
+  // a desktop-width window that was resized down and back up again
+  window.addEventListener('resize', function () { if (!qrDrawn) refreshQR(); });
 
   function escapeHtml(s) {
     return String(s == null ? '' : s)
@@ -181,7 +226,7 @@
     var restore = saved || pendingName;
     if (restore) $shortid.value = restore + '@' + location.hostname;
     fitAddress();
-    if (restore) drawQR(restore + '@' + location.hostname);
+    if (restore) refreshQR(restore + '@' + location.hostname);
   }
 
   $refresh.addEventListener('click', function () {
@@ -387,7 +432,7 @@
     var full = (saved || pendingName) + '@' + location.hostname;
     $shortid.value = full;
     fitAddress();
-    drawQR(full);
+    refreshQR(full);
   })();
 
   /* ---------- socket ---------- */

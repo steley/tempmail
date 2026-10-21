@@ -11,9 +11,12 @@ const log = createLogger('store');
  *    welcome live, but 20 of them cached per mailbox across hundreds of
  *    mailboxes would blow the heap — so the global budget evicts the
  *    soonest-to-expire mailbox when exceeded.
- *  - Mail is written here AFTER the realtime broadcast, so the store can
- *    never delay or block live delivery. Losing the store only loses the
- *    replay buffer, never live mail.
+ *  - put() is a synchronous in-memory write that runs BEFORE the realtime
+ *    broadcast (see the 'mail' handler in realtime/inbox.js). Being
+ *    synchronous and allocation-only, it cannot delay or block live
+ *    delivery; running first means a mailbox with no live socket still has
+ *    its replay entry before any listener is notified. Losing the store
+ *    only loses the replay buffer, never live mail.
  *  - Boxes survive socket disconnect (that is the point) and are swept by
  *    a timer at ttl/4 granularity.
  */

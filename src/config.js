@@ -32,7 +32,10 @@ export default {
     maxConnections: envNum('SMTP_MAX_CONNECTIONS', 30),
     // max seconds of inactivity while receiving DATA (smtp-server default idle timeout is 60s)
     dataTimeoutMs: envNum('SMTP_DATA_TIMEOUT_MS', 30_000),
-    // per-mailbox broadcast rate limit: mails forwarded to sockets per minute
+    // per-mailbox notification budget: machine-generated events (server error,
+    // oversize notices) forwarded to one mailbox's sockets per minute. Real
+    // 'mail' deliveries are deliberately NOT counted here — throttling them
+    // would let an attacker's junk flood hide a user's verification code.
     ratePerMinute: envNum('SMTP_RATE_PER_MIN', 20),
     // per-IP abuse guards: concurrent SMTP sessions and accepted mails per minute.
     // The 30-connection global pool is shared by everyone; without per-IP caps a

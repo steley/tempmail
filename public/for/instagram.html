@@ -108,6 +108,36 @@
       <li>Click the confirmation link or copy the code immediately; the mailbox is short-lived and holds at most 20 messages.</li>
     </ol>
 
+    <h2>When Instagram asks for the address again</h2>
+    <p>The re-verification is the part that catches people, so it is worth knowing what triggers it. None of these are rare, and none of them happen at sign-up.</p>
+    <ul>
+      <li><b>A new device or a new network.</b> Logging in from a phone you have not used, or from a different country, is the most common trigger. Instagram sends a "was this you" message with a link to either confirm or secure the account.</li>
+      <li><b>A password change.</b> The confirmation goes to the address on file, not to the current session.</li>
+      <li><b>Upgrading to a professional account.</b> The upgrade asks you to confirm contact details, and the confirmation is a mail.</li>
+      <li><b>Linking a Facebook page.</b> The link runs through Meta's shared identity layer, which verifies both sides.</li>
+      <li><b>Any appeal.</b> If the account is restricted, the appeal outcome is delivered by mail. A restricted account on a dead address has no way to learn it was reinstated.</li>
+    </ul>
+    <p>The list is short but the message is not: the mailbox is not needed once at sign-up, it is needed at every point where Instagram decides the session looks unfamiliar — and that decision is not yours to schedule.</p>
+
+    <h2>The repair window, step by step</h2>
+    <p>If you registered with a disposable address and the account turns out to be worth keeping, the fix must happen inside the mailbox's lifetime — roughly thirty minutes from the last message. The order below matters because each step depends on the previous one being confirmed.</p>
+    <ol>
+      <li><b>Do not close the inbox tab.</b> The address survives a reload, but the live view is what tells you a confirmation has arrived.</li>
+      <li><b>Add the real address as an additional email</b> in Instagram's account settings, rather than editing the existing one. Adding gives you two reachable routes; editing gives you one, and it is unconfirmed until the mail lands.</li>
+      <li><b>Confirm from the real inbox.</b> The confirmation is a link, and it has to be opened from a session you control.</li>
+      <li><b>Set the real address as primary.</b> Instagram's recovery flow follows the primary contact, not the secondary.</li>
+      <li><b>Remove the disposable address last</b>, while the mailbox still exists to confirm the removal.</li>
+    </ol>
+    <p>Miss the window and the account is not immediately lost — an active session keeps working. The repair then has to happen from inside that session the next time you open the app, which is a fine outcome as long as you never get logged out first. Treat the mailbox as a countdown, not a background task.</p>
+
+    <h2>Using a throwaway identity for API work</h2>
+    <p>A genuinely good use case, with a caveat. If you are testing an integration against Meta's APIs, you need a real account to authenticate, and you do not want that account to be your personal one. A disposable identity is the right shape for that — but Meta's developer platform requires an app, a verified business or individual identity, and review for most permissions, so the throwaway account is only the shell. The credentials that matter live in the app dashboard, not in the mailbox.</p>
+    <p>The practical risk: if the throwaway account is the app's admin and it locks, the app loses its admin. For API work, register the developer account with a real mailbox you control and use the disposable one only as a test subject where the platform allows it.</p>
+
+    <h2>Reading the trade-off honestly</h2>
+    <p>Instagram is the platform where the gap between "works" and "stays working" is widest. The sign-up completes cleanly, the confirmation arrives in seconds, and the account behaves normally for weeks — which builds false confidence in a setup that has exactly one point of failure, scheduled to appear at the least convenient moment.</p>
+    <p>If the account is a demo, a test subject, or a week-long experiment, a temporary inbox is the correct tool and this page is overthinking it. If you would be annoyed to lose it, the cost of using a real alias instead is one extra inbox, and the cost of not doing so is the account.</p>
+
     <h2>What a temp mail account is good for</h2>
     <p>Reading public profiles, checking how a competitor's bio or link-in-bio renders when logged in, following a hashtag for a week, or testing an integration against Instagram's API with a throwaway identity. In all of those, the account is disposable by design and losing it costs nothing.</p>
     <p>It is a poor fit for anything you would want to post from in six months, for a business profile tied to a shop, or for anything connected to payments or ads. Those all depend on recovery working, and recovery is exactly what a 30-minute mailbox cannot provide.</p>
@@ -129,7 +159,7 @@
   <div class="footer-inner">
     <div class="footer-col footer-col--brand">
       <a class="footer-brand-name" href="/">TempMail.cc</a>
-      <p class="footer-tagline">No account, no password, no ads.</p>
+      <p class="footer-tagline">No account, no password, no sign-up.</p>
       <span class="footer-legal">
         <a href="/terms.html">Terms of Service</a>
         <span class="sep" aria-hidden="true">&middot;</span>

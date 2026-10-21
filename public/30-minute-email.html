@@ -116,6 +116,12 @@
     <h2>When 30 minutes is the wrong tool</h2>
     <p>Anything that expects the address to answer later: account recovery, security checks on a new device, receipts for an order you might dispute, or a service that re-verifies after a few days. Those need a mailbox that persists, and the honest answer is a real provider — ideally an alias, which gives you the separation from your main inbox without the cliff edge. The <a href="/faq.html">FAQ</a> lists what else this service deliberately does not do.</p>
 
+    <h2>Three things the window does not protect you from</h2>
+    <p>The lifetime is generous for a normal flow and does nothing at all for the three ways people actually lose mail. Worth knowing before you rely on the number.</p>
+    <p><b>A tab that sleeps.</b> A background tab on a phone stops receiving pushes, and the connection drops without an error anyone notices. This is handled, but not by extending the window: the server keeps the messages it accepted, and they are replayed in one batch the moment the tab reopens and reclaims the address. So the mail is not lost, but it is invisible until you look — and if you were waiting on a code to type into the same phone, "reopen the tab" is the step people forget.</p>
+    <p><b>Someone else using the same name.</b> Because an address is not a password, a name can be released and claimed again. If you close the tab and a visitor picks the same memorable string, they get a fresh empty inbox — not your old mail, which was swept — but from that point the name is theirs. This is why a random generated address is safer than a custom one you can spell in a sentence.</p>
+    <p><b>A sender that retries later.</b> Mail servers queue and retry a failed delivery, sometimes for hours. A retry that succeeds after the mailbox has been swept does not resurrect it; the message is accepted and discarded like any other mail to a name nobody is watching. If a code "never arrived", the honest possibilities are a blocked domain, a silent rejection at the sending side, or a retry that landed after you stopped looking.</p>
+
     <h2>Related reading</h2>
     <ul>
       <li><a href="/faq.html">Temp mail FAQ: lifetime, attachments, limits</a></li>
@@ -130,7 +136,7 @@
   <div class="footer-inner">
     <div class="footer-col footer-col--brand">
       <a class="footer-brand-name" href="/">TempMail.cc</a>
-      <p class="footer-tagline">No account, no password, no ads.</p>
+      <p class="footer-tagline">No account, no password, no sign-up.</p>
       <span class="footer-legal">
         <a href="/terms.html">Terms of Service</a>
         <span class="sep" aria-hidden="true">&middot;</span>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Free Temporary Email — Instant Inbox, No Sign-Up | TempMail.cc</title>
-  <meta name="description" content="Get a disposable email address the moment the page loads. Live inbox over WebSocket, 30-minute auto-expiry, no account, no ads.">
+  <meta name="description" content="Get a disposable email address the moment the page loads. Live inbox over WebSocket, 30-minute auto-expiry, no account, no sign-up.">
   <meta name="keywords" content="temporary email, disposable email, free email, spam protection, privacy email, anonymous email">
   <link rel="canonical" href="https://tempmail.cc/">
   <meta name="robots" content="index, follow, max-image-preview:large">
@@ -23,7 +23,7 @@
   <meta property="og:site_name" content="TempMail.cc">
   <meta property="og:locale" content="en_US">
   <meta property="og:title" content="Free Temporary Email — Instant Inbox, No Sign-Up">
-  <meta property="og:description" content="A disposable email address the moment the page loads. Live inbox over WebSocket, 30-minute auto-expiry, no account, no ads.">
+  <meta property="og:description" content="A disposable email address the moment the page loads. Live inbox over WebSocket, 30-minute auto-expiry, no account, no sign-up.">
   <meta property="og:url" content="https://tempmail.cc/">
   <meta property="og:image" content="https://tempmail.cc/logo.png">
   <meta property="og:image:width" content="512">
@@ -31,7 +31,7 @@
   <meta property="og:image:alt" content="TempMail.cc logo">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Free Temporary Email — Instant Inbox, No Sign-Up">
-  <meta name="twitter:description" content="A disposable email address the moment the page loads. Live inbox, 30-minute auto-expiry, no account, no ads.">
+  <meta name="twitter:description" content="A disposable email address the moment the page loads. Live inbox, 30-minute auto-expiry, no account, no sign-up.">
   <meta name="twitter:image" content="https://tempmail.cc/logo.png">
 
   <script type="application/ld+json">
@@ -218,17 +218,44 @@
   <section class="seo-block">
     <h2>What TempMail.cc does</h2>
     <p>TempMail.cc provides a secure, anonymous, temporary email address that protects your personal inbox from spam, phishing, and unwanted marketing emails. No registration, no password, no personal data — your disposable address is ready the moment this page loads.</p>
+    <p>It is a single-purpose tool on purpose. There is no account to create, no dashboard to configure, and no settings to get wrong: you copy the address, paste it where a site demands one, and read what arrives. When you close the tab, there is nothing left to clean up.</p>
     <ul>
       <li>Emails are kept for about 30 minutes, then automatically and permanently deleted.</li>
       <li>Only text and HTML messages are supported. Attachments are disabled.</li>
       <li>This is a receive-only mailbox; sending emails is not available.</li>
     </ul>
+
     <h2>What is a temporary email address?</h2>
     <p>A temporary (disposable) email address is a short-lived inbox that you can use instead of your real email when signing up for services, downloading files, or testing applications. It protects your personal inbox from spam, phishing, and unwanted marketing — and from services that sell your address to advertisers.</p>
+    <p>A disposable address is not a secret address, and that distinction matters more than anything else on this page. These inboxes have no password by design — anyone who types the same name gets the same inbox. That is fine for a verification code and wrong for anything a stranger should not read, which is why the service refuses to pretend otherwise.</p>
+
+    <h2>How the inbox works</h2>
+    <p>Mail arrives over SMTP and is pushed to your browser over a WebSocket connection, so a message appears a second or two after it is sent rather than when you next refresh. Nothing is written to disk: the mailbox lives in the server's memory, which is why a server restart clears it and why there is no archive to request later.</p>
+    <p>If your tab was closed or asleep when mail arrived, the stored copy is replayed as soon as you reopen the address — including on a different device, if you saved the recovery link. That replay window is the same 30 minutes as the mailbox itself; it is a convenience for a reconnect, not a backup.</p>
+
+    <h2>What it does not do</h2>
+    <ul>
+      <li><b>It does not send.</b> There is no outbound path. A site whose flow depends on a reply from the same address will not complete here.</li>
+      <li><b>It does not keep attachments.</b> Only the text and HTML parts are stored, so a message that was entirely a file arrives empty.</li>
+      <li><b>It does not survive the window.</b> Once the mailbox is swept, the mail is gone and no support request can recover it.</li>
+      <li><b>It does not protect secrets.</b> No password means no privacy guarantee against anyone who guesses or knows the name.</li>
+    </ul>
+
+    <h2>When a temp address is the wrong tool</h2>
+    <p>Use a disposable address for a one-off code, a download gate, a coupon you will spend in the same session, or a test account you never intend to reopen. The moment an account has something worth losing behind it, the calculus flips:</p>
+    <ul>
+      <li><b>Anything you may need to recover.</b> A password reset goes to an address that will not exist tomorrow. There is no fallback channel here.</li>
+      <li><b>Purchases, returns and disputes.</b> Receipts, tracking numbers and refund decisions arrive by mail and are the evidence a dispute needs. See <a href="/for/temu.html">the Temu guide</a> for how that plays out.</li>
+      <li><b>Accounts with money or identity attached.</b> Banking, government portals, work accounts, marketplaces. <a href="/for/steam.html">Steam</a> is the clearest example: its second factor is the mailbox.</li>
+      <li><b>Anything that re-verifies later.</b> <a href="/for/instagram.html">Instagram</a> and <a href="/for/facebook.html">Facebook</a> both ask again on a new device, weeks after the sign-up.</li>
+    </ul>
+    <p>If what you actually want is "not my main inbox" rather than "gone in 30 minutes", an alias at a normal provider does that job better — same separation from marketing mail, but the address still exists when something asks for it.</p>
+
     <h2>Is TempMail.cc free?</h2>
-    <p>Yes, TempMail.cc is completely free. No registration, password, or personal information is required — a disposable address is generated the moment you open the page, and you can change it or set a custom one at any time.</p>
+    <p>Yes, TempMail.cc is completely free. No registration, password, or personal information is required — a disposable address is generated the moment you open the page, and you can change it or set a custom one at any time. The service is run by one person and costs a single small server to operate; there is no funded business behind it, and nothing on the page is gated behind a plan.</p>
+
     <h2>How long do emails stay?</h2>
-    <p>Emails arrive in real time and are kept for about 30 minutes after the last message, then automatically and permanently deleted. Reopen the site in the same browser and your inbox comes back with its recent mail, or copy a recovery link to reopen it on another device within that window. Because temporary inboxes are public by nature, anyone who knows the address can read it — never use TempMail.cc for confidential communications or important account recovery.</p>
+    <p>Emails arrive in real time and are kept for about 30 minutes after the last message, then automatically and permanently deleted. Reopen the site in the same browser and your inbox comes back with its recent mail, or copy a recovery link to reopen it on another device within that window. The clock resets with each new message, so the real deadline is the last arrival plus thirty minutes — <a href="/30-minute-email.html">that page explains what the timer does and does not cover</a>. Because temporary inboxes are public by nature, anyone who knows the address can read it — never use TempMail.cc for confidential communications or important account recovery.</p>
     <p>Have more questions? Read the full <a href="/faq.html">FAQ</a> or learn <a href="/about.html">why we built TempMail.cc</a>.</p>
   </section>
 </main>
@@ -237,7 +264,7 @@
   <div class="footer-inner">
     <div class="footer-col footer-col--brand">
       <a class="footer-brand-name" href="/">TempMail.cc</a>
-      <p class="footer-tagline">No account, no password, no ads.</p>
+      <p class="footer-tagline">No account, no password, no sign-up.</p>
       <span class="footer-legal">
         <a href="/terms.html">Terms of Service</a>
         <span class="sep" aria-hidden="true">&middot;</span>

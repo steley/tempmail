@@ -108,6 +108,35 @@
     <p>Facebook's fallback recovery paths — identity documents, trusted contacts, a phone number on file — are exactly what a throwaway sign-up does not have. The result is an account that works until the first lockout and then cannot be reopened at all.</p>
     <p>That is acceptable for a page you create to test something and never touch again. It is a bad trade for an account you intend to keep, even one you think of as low-stakes.</p>
 
+    <h2>What an account on a dead address cannot do</h2>
+    <p>Facebook ties more to the address than most people assume, and the losses arrive in a specific order. Knowing them in advance is the difference between a throwaway account and an afternoon of support tickets.</p>
+    <ul>
+      <li><b>Password reset.</b> The obvious one. The reset link goes to the address on file, and there is no secondary route unless you added a phone number or a trusted contact.</li>
+      <li><b>Re-verification after a flag.</b> New accounts that exist only on an address with no history are the pattern anti-abuse systems are built to catch. A flag raised a week later has nowhere to send its challenge.</li>
+      <li><b>Page and group admin roles.</b> If the account administers a page, Meta verifies administrative changes through the account's own channels. Losing the address means losing the ability to hand the page to anyone else.</li>
+      <li><b>Ad account and billing.</b> Anything involving a payment method expects a reachable address. Ad accounts registered to a dead inbox tend to be the ones that get stuck in review with no notification reaching you.</li>
+      <li><b>Marketplace and payouts.</b> A sale that goes wrong is resolved through messages and mail that assume the account holder can be reached.</li>
+    </ul>
+    <p>None of these break at sign-up. They break weeks later, which is exactly why a disposable address feels like it worked.</p>
+
+    <h2>Why Facebook asks for a number when you gave it an email</h2>
+    <p>It is not a technical objection to disposable domains — it is an economics problem on their side. An address costs nothing to create; a phone number costs something. When an account is created from an unfamiliar device, an unfamiliar network, or a browser with no history, the number is the cheaper way to make the account traceable, so the flow drifts toward asking for one even when an email field was offered first.</p>
+    <p>The practical consequence: a phone prompt after a successful email step is not a bug in the flow, and it is not something a different address will fix. If the form demands a number, the experiment is over. No amount of retrying with a fresh inbox changes that.</p>
+
+    <h2>The repair window, if you change your mind</h2>
+    <p>If the account turns out to matter, you have roughly the life of the mailbox to fix it — about thirty minutes from the last message that arrived. The order matters:</p>
+    <ol>
+      <li>Keep the inbox tab open. Closing it does not delete the mail, but you lose the live view that tells you a confirmation arrived.</li>
+      <li>In Facebook's settings, add the real address as a second email rather than replacing the first. Adding is usually a softer change than swapping, and it leaves you a working route if the confirmation is slow.</li>
+      <li>Confirm the new address from your real inbox, then set it as the primary contact.</li>
+      <li>Only after that, remove the disposable address — and note that removal is itself a change Meta may want to confirm through the address being removed, so do it while the mailbox still exists.</li>
+    </ol>
+    <p>If the mailbox is already gone, you are not locked out yet — a logged-in session on a device still works. The repair from there runs through the security settings of that live session, and it is worth doing before the next password prompt rather than after.</p>
+
+    <h2>The alternative that keeps the separation</h2>
+    <p>Most people reaching for a disposable address want one of two different things, and only one of them needs a 30-minute inbox. If the goal is "a Facebook account that is not connected to my real identity in a way marketing can exploit", an alias at a normal provider does it better: the address is unique per service, forwards to your real inbox, and — crucially — still exists when Facebook asks again in three months.</p>
+    <p>If the goal is "an account that genuinely cannot be traced back to me at all", a disposable address does not achieve that either, because the platform's fingerprinting does not depend on the email. It uses device, network and behaviour signals. The address only decides whether you can get back in.</p>
+
     <h2>Verdict</h2>
     <p>Use a temp mail address for Facebook only when you need a one-off account and can afford to lose it: checking what a page looks like to a logged-in user, testing a signup flow you are building, or reading a group you will never return to. For anything else, use a real mailbox — a dedicated alias at a normal provider gives you the same separation from your main inbox without the 30-minute cliff.</p>
     <p>If you do proceed, treat the account as already lost, and copy anything you need before the tab closes.</p>
@@ -126,7 +155,7 @@
   <div class="footer-inner">
     <div class="footer-col footer-col--brand">
       <a class="footer-brand-name" href="/">TempMail.cc</a>
-      <p class="footer-tagline">No account, no password, no ads.</p>
+      <p class="footer-tagline">No account, no password, no sign-up.</p>
       <span class="footer-legal">
         <a href="/terms.html">Terms of Service</a>
         <span class="sep" aria-hidden="true">&middot;</span>

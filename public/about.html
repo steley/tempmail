@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About - TempMail.cc</title>
-  <meta name="description" content="About TempMail.cc — a free, self-hosted temporary email service. Learn why we built it and how to reach us at hi@httpsmail.com.">
+  <meta name="description" content="About TempMail.cc — a free, self-hosted temporary email service. Learn why we built it and how to reach us at admin@tempmail.cc.">
   <link rel="canonical" href="https://tempmail.cc/about.html">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#2563eb">
@@ -46,7 +46,18 @@
       "@type": "Organization",
       "name": "TempMail.cc",
       "url": "https://tempmail.cc/",
-      "email": "hi@httpsmail.com"
+      "email": "admin@tempmail.cc",
+      "description": "A free, receive-only temporary email service, independently built and maintained since 2023.",
+      "foundingDate": "2023",
+      "sameAs": [
+        "https://github.com/steley/tempmail"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "admin@tempmail.cc",
+        "contactType": "customer support",
+        "availableLanguage": "English"
+      }
     }
   }
   </script>
@@ -78,13 +89,34 @@
     <p>Your real email address is valuable — and every sign-up form on the internet wants it. Hand it out, and sooner or later it ends up on a marketing list, in a data breach, or buried under daily newsletters you never asked for.</p>
     <p>TempMail.cc is a <b>free, self-hosted temporary email service</b> that gives you a disposable, receive-only inbox the moment you open the page. Use it for sign-ups, downloads, testing, or anywhere you don't want to give away your real address. No registration, no password, no personal data.</p>
 
+    <h2>Who runs it</h2>
+    <p>TempMail.cc is run by one person — an independent developer who writes the code, reads the mail sent to <a href="mailto:admin@tempmail.cc?subject=TempMail.cc%20Inquiry">admin@tempmail.cc</a>, and pays for the server. There is no company behind the site and no investors. The source code is public at <a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">github.com/steley/tempmail</a>, so any claim on this page can be checked against the code that implements it — including the ones below about what the service refuses to store.</p>
+    <p>That constraint shapes the product. It is a utility built to stay small enough for one person to keep running, not a product with a growth plan, and every feature has to earn its maintenance cost.</p>
+
     <h2>How it works</h2>
+    <p>Three pieces, deliberately small, and none of them talk to an external service.</p>
     <ul>
-      <li>A disposable address is generated instantly and works in real time — emails arrive as they are sent;</li>
-      <li>All messages are automatically and permanently deleted when you reload the page or your session expires;</li>
-      <li>It is receive-only: sending is not supported, and attachments are disabled;</li>
-      <li>Email content is rendered in a sandboxed environment, so messages cannot run scripts on the site.</li>
+      <li><b>An inbound SMTP server</b> accepts mail for any address on the domain. There is no mailbox provisioning step to wait for — any name exists the moment someone sends to it.</li>
+      <li><b>A parser running on a worker thread</b> turns the raw MIME message into headers, HTML and text. Running it off the main thread means a multi-megabyte message can never stall the live delivery of someone else's verification code.</li>
+      <li><b>An in-memory mailbox store</b> holds each message against its address for about 30 minutes, and a WebSocket connection pushes new mail to the open tab as it arrives. Nothing is written to disk, so restarting the server clears every mailbox on it.</li>
     </ul>
+    <p>Because delivery is pushed rather than polled, a message usually appears before the sending site's page has finished loading. If your tab was closed or asleep when a message arrived, the stored copy is replayed as soon as you reopen the address — which is why the address survives a page reload and a recovery link works on a second device.</p>
+
+    <h2>What it deliberately does not do</h2>
+    <ul>
+      <li><b>It does not send.</b> The server has no submission port and no outbound path. This is structural, not a missing feature — a receive-only service cannot be repurposed to send spam, which is why it can exist at all.</li>
+      <li><b>It does not keep attachments.</b> Only the text and HTML parts are stored; a message whose whole content was a file arrives empty.</li>
+      <li><b>It does not have accounts.</b> No password, therefore no password reset, therefore no support desk that can hand an inbox to someone who claims to own it. Being able to reopen an address with a recovery link is the only access control, and it expires with the mail.</li>
+      <li><b>It does not persist.</b> Mail lives in memory and is swept on a timer. Logs are short-lived technical records kept for abuse prevention, described in the <a href="/privacy.html">Privacy Policy</a>.</li>
+    </ul>
+
+    <h2>Why thirty minutes</h2>
+    <p>The lifetime is a compromise between two failures. Too short and a slow sender — a bank, a marketplace, a mailing list that batches — loses the message; too long and the service becomes a free permanent mailbox with none of the accountability of one, which is how disposable inbox services turn into infrastructure for abuse. Thirty minutes covers a verification flow with a wide margin and still means a mailbox is gone before most people could return to it the next day.</p>
+    <p>What the number does not mean is that mail is guaranteed for thirty minutes from arrival. The clock is reset by each new message and the whole inbox is dropped when the window closes, so the practical deadline is the last message's arrival plus thirty minutes. <a href="/30-minute-email.html">A separate page covers this in detail.</a></p>
+
+    <h2>A short history</h2>
+    <p>The first version went live in 2023 as a thin single page: one inbox, three sentences of explanation, and no other pages on the site at all. It ran essentially unchanged for three years, which was fine for the handful of people using it and useless for anyone who arrived and wanted to know what they were looking at.</p>
+    <p>In October 2026 the whole thing was rewritten from scratch — new SMTP gateway, new parser, new front end, and the rest of the site you are reading now: the <a href="/faq.html">FAQ</a>, the per-platform guides, a changelog, and a recovery link that lets an inbox move between devices. The rewrite also fixed a class of bugs that quietly lose mail, including mail arriving while the browser was reconnecting. <a href="/changelog.html">The changelog records what changed and when.</a></p>
 
     <h2>Our principles</h2>
     <ul>
@@ -94,7 +126,7 @@
     </ul>
 
     <h2>Open source</h2>
-    <p>TempMail.cc is <b>free and open source</b> — the full server, SMTP gateway and frontend live in a public repository. Inspect the code, run your own instance, or contribute:</p>
+    <p>TempMail.cc is <b>free and open source</b> under the GPL-2.0 — the full server, SMTP gateway and frontend live in a public repository. Inspect the code, run your own instance, or contribute:</p>
     <div class="contact-card">
       <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" style="color: var(--text-secondary);" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
       <a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">github.com/steley/tempmail</a>
@@ -104,7 +136,7 @@
     <p>Feedback, bug reports, abuse reports, or partnership inquiries — we read everything:</p>
     <div class="contact-card">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
-      <a href="mailto:hi@httpsmail.com?subject=TempMail.cc%20Inquiry">hi@httpsmail.com</a>
+      <a href="mailto:admin@tempmail.cc?subject=TempMail.cc%20Inquiry">admin@tempmail.cc</a>
     </div>
   </article>
 </main>
@@ -113,7 +145,7 @@
   <div class="footer-inner">
     <div class="footer-col footer-col--brand">
       <a class="footer-brand-name" href="/">TempMail.cc</a>
-      <p class="footer-tagline">No account, no password, no ads.</p>
+      <p class="footer-tagline">No account, no password, no sign-up.</p>
       <span class="footer-legal">
         <a href="/terms.html">Terms of Service</a>
         <span class="sep" aria-hidden="true">&middot;</span>

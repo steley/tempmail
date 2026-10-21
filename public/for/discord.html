@@ -108,6 +108,34 @@
     </ol>
     <p>That last step is the only thing that makes a temp-mail Discord account durable, and it is worth doing within the 30-minute window rather than later.</p>
 
+    <h2>Which servers actually gate on verification</h2>
+    <p>The unverified state is cheap to test, and worth testing before assuming the worst. What it blocks depends entirely on the server, because verification requirements are set by whoever runs the community rather than by Discord itself.</p>
+    <ul>
+      <li><b>Large public servers</b> usually require a verified account to post, because an unverified account is the cheapest thing a spammer can produce. Reading and browsing is normally still open.</li>
+      <li><b>Small and hobby servers</b> frequently do not check at all. If the only thing you need is one community, this is worth trying before deciding the whole exercise is pointless.</li>
+      <li><b>Servers with a rules gate</b> ask you to accept rules before any channel appears — a separate step from email verification, and one that does not involve mail.</li>
+      <li><b>Voice-only use</b> is often available before verification. Joining a call does not require a confirmed address on many servers.</li>
+    </ul>
+    <p>So the honest order of operations is: sign up, try the thing you actually wanted to do, and only then decide whether verification is necessary. Verifying through a mailbox you will lose in half an hour has a real cost, and it is worth being sure you need it.</p>
+
+    <h2>The alt-account problem</h2>
+    <p>This is the risk that has nothing to do with email delivery and everything to do with how the account looks. Discord's terms prohibit using additional accounts to get around a ban or a server-level restriction, and its enforcement does not depend on the email address — it looks at device, network and behaviour. A disposable address does not make an account indistinguishable from a first account; it just makes the account harder for you to recover.</p>
+    <p>In practice, a spare account for reading a support server or testing OAuth is normal and nobody cares. A spare account that joins the same server as a restricted account, from the same network, is the pattern that gets both accounts looked at. If you are creating a second account for a legitimate reason, use a real address and keep it separate — the mailbox is not the part that keeps you out of trouble.</p>
+
+    <h2>The repair window</h2>
+    <p>If you registered with a disposable address and want to keep the account, the fix needs to happen inside the mailbox's lifetime, and Discord makes it unusually easy — changing the email does not require confirming the old one from a link, just access to the current session.</p>
+    <ol>
+      <li>Keep the TempMail.cc tab open until verification is complete; the link arrives within seconds but the tab is what shows it.</li>
+      <li>Click the verification link, then go straight to <b>User Settings → My Account</b>.</li>
+      <li>Update the email to an address you control and confirm it from that inbox.</li>
+      <li>Enable two-factor authentication and save the backup codes somewhere outside the account — a password manager note, or paper. They are shown once.</li>
+    </ol>
+    <p>Steps three and four together are what make the account durable. Step four alone is not enough: backup codes let you log in, but a password reset still follows the registered address.</p>
+
+    <h2>What support will and will not do</h2>
+    <p>Discord support can help with a compromised account, a lost phone, or a disabled account, and the first thing they ask for is proof of ownership — which in practice means the registered email and the account's creation details. "The mailbox was a disposable one from a service that deletes after thirty minutes" is not proof of anything, and it does not move a ticket forward.</p>
+    <p>What they cannot do is restore access to an account whose only recovery channel has evaporated. There is no identity document that substitutes, because there was never an identity on file. That is the trade the disposable address makes, and it is made at sign-up, not at the moment of loss.</p>
+
     <h2>The honest recommendation</h2>
     <p>For a throwaway account used to read one server or test an integration, a disposable address is exactly right: no inbox clutter, no marketing mail, nothing to clean up. For an account you will actually use — one with friends on it, one with a nickname people recognise, one with anything worth keeping — start with a real address. The cost of doing that later is a support ticket you will probably lose.</p>
     <p>If you have already registered with a temp address and want to keep the account, change the email now. It takes a minute and it is the difference between an account and a demo.</p>
@@ -126,7 +154,7 @@
   <div class="footer-inner">
     <div class="footer-col footer-col--brand">
       <a class="footer-brand-name" href="/">TempMail.cc</a>
-      <p class="footer-tagline">No account, no password, no ads.</p>
+      <p class="footer-tagline">No account, no password, no sign-up.</p>
       <span class="footer-legal">
         <a href="/terms.html">Terms of Service</a>
         <span class="sep" aria-hidden="true">&middot;</span>

@@ -23,7 +23,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'p
 // assets whose ?v= stamp is content-derived
 const ASSETS = ['/js/app.js', '/css/modern.css'];
 
-const htmlFiles = (await readdir(root)).filter((f) => f.endsWith('.html'));
+// every .html under public/, including subdirectories such as /for/
+const htmlFiles = (await readdir(root, { recursive: true })).filter((f) => f.endsWith('.html'));
 
 let changed = 0;
 for (const asset of ASSETS) {

@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FAQ - TempMail.cc Temporary Email</title>
-  <meta name="description" content="Frequently asked questions about TempMail.cc: how the free temporary email works, how long emails stay, custom addresses, attachments, safety and more.">
+  <title>Temp Mail FAQ — Lifetime, Attachments, Limits | TempMail.cc</title>
+  <meta name="description" content="Straight answers about temp mail: how long an address lasts, whether it accepts attachments, why there is no password, and what websites block it.">
   <link rel="canonical" href="https://tempmail.cc/faq.html">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#2563eb">
   <link rel="shortcut icon" href="/favicon.png">
   <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png">
   <link rel="apple-touch-icon" href="/logo.png">
-  <link rel="stylesheet" href="/css/modern.css?v=aa717080">
+  <link rel="stylesheet" href="/css/modern.css?v=418c3a54">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="TempMail.cc">
   <meta property="og:locale" content="en_US">
-  <meta property="og:title" content="FAQ - TempMail.cc Temporary Email">
-  <meta property="og:description" content="How TempMail.cc works: email lifetime, custom addresses, attachments, safety and more.">
+  <meta property="og:title" content="Temp Mail FAQ — Lifetime, Attachments, Limits">
+  <meta property="og:description" content="How long a temp mail address lasts, whether it can receive attachments, why there is no password, and which sites block disposable domains.">
   <meta property="og:url" content="https://tempmail.cc/faq.html">
   <meta property="og:image" content="https://tempmail.cc/logo.png">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="FAQ - TempMail.cc Temporary Email">
-  <meta name="twitter:description" content="How TempMail.cc works: email lifetime, custom addresses, attachments, safety and more.">
+  <meta name="twitter:title" content="Temp Mail FAQ — Lifetime, Attachments, Limits">
+  <meta name="twitter:description" content="How long a temp mail address lasts, whether it can receive attachments, why there is no password, and which sites block disposable domains.">
   <meta name="twitter:image" content="https://tempmail.cc/logo.png">
 
   <!-- Analytics: all tracking lives in /js/ga.js (self-hosters: replace or blank it) -->
@@ -32,71 +32,67 @@
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "url": "https://tempmail.cc/faq.html",
+    "inLanguage": "en",
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is a temporary email address?",
-        "acceptedAnswer": { "@type": "Answer", "text": "A temporary (disposable) email address is a short-lived inbox that you can use instead of your real email when signing up for services, downloading files, or testing applications. It protects your personal inbox from spam, phishing, and unwanted marketing." }
+        "name": "How long does a temporary email address last?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Mail is kept for about 30 minutes after the last message arrives. The window resets with every new message, so an active conversation keeps the mailbox alive. Nothing is stored beyond that and there is no archive. The address itself is never registered to you: while the tab is open it is bound to your connection, but once it closes the name can be claimed by anyone." }
       },
       {
         "@type": "Question",
-        "name": "Is TempMail.cc free?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Yes, TempMail.cc is completely free. No registration, password, or personal information is required — a disposable address is generated the moment you open the page." }
+        "name": "What happens to my emails after 30 minutes?",
+        "acceptedAnswer": { "@type": "Answer", "text": "They are permanently deleted from memory. There is no archive, no backup and no way to recover them, and a recovery link expires at the same moment. Copy any confirmation code, download link or password-reset link while the message is on screen." }
       },
       {
         "@type": "Question",
-        "name": "How long do emails stay?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Emails arrive in real time and are kept for about 30 minutes after the last message, then automatically and permanently deleted. Nothing is archived or backed up. The mailbox is receive-only and does not support attachments or sending." }
+        "name": "Can a temporary email receive attachments?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. Attachments are stripped by the parser before delivery, so only the text and HTML body of a message reaches your inbox. Inline images referenced with cid: will not load. Messages larger than 5 MB are rejected during the SMTP conversation, so the sender is told the mail did not go through." }
       },
       {
         "@type": "Question",
-        "name": "How do I get back to my inbox after closing the page?",
-        "acceptedAnswer": { "@type": "Answer", "text": "In the same browser, just reopen the site — your address is restored automatically and recent mail replays. On another device, click Recovery link below the inbox and open the copied link within about 30 minutes. Treat a recovery link like a password: it gives full access to the inbox." }
+        "name": "Can I get a temp mail address with a password?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. There are no accounts and no passwords anywhere in the service, and a custom address is not protected by one. The closest equivalent is the recovery link: it reopens your inbox, with its recent mail, on another device for about 30 minutes. Treat it exactly like a password, because anyone holding it gets full read access." }
       },
       {
         "@type": "Question",
-        "name": "Can I send emails from a temporary address?",
-        "acceptedAnswer": { "@type": "Answer", "text": "No. TempMail.cc is a receive-only service. You can receive and read messages in real time, but sending is not supported." }
+        "name": "Is temp mail detectable by websites?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Disposable domains are published on widely used blocklists, and many services check the domain before or after you submit a form. Expect a portion of sign-ups to be refused outright. Claims of undetectable temporary email are false advertising: detection is done by the receiving site and no client can prevent it." }
       },
       {
         "@type": "Question",
-        "name": "Can I receive attachments?",
-        "acceptedAnswer": { "@type": "Answer", "text": "No. Attachments are disabled for safety reasons. Only plain text and HTML messages are supported." }
+        "name": "Can I use temp mail for Facebook verification?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Sometimes, but Facebook is one of the stricter platforms and may ask for a phone number instead, or reject the domain after the code step. It also ties the account to an address you will lose within 30 minutes, which makes later recovery impossible. It works best for one-off pages and testing, not for an account you want to keep." }
       },
       {
         "@type": "Question",
-        "name": "Can I choose a custom email address?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Click the edit button next to your address to set any available custom name, or click the refresh button to get a new random one. Custom names are first-come, first-served and not password protected." }
-      },
-      {
-        "@type": "Question",
-        "name": "Is a temporary inbox private?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Temporary inboxes are public by nature: anyone who knows the address can read its live mail. Never use TempMail.cc for confidential communications, sensitive accounts, or password recovery." }
+        "name": "How do I open the same inbox on another device?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Click Recovery link below the inbox and open the copied link on the other device within about 30 minutes. Reopening the site in the same browser restores the address automatically, because it is saved locally. A recovery link grants full access to that inbox, so send it to yourself, never to anyone else." }
       },
       {
         "@type": "Question",
         "name": "Why am I not receiving emails?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Check that you sent the message to the exact address shown on the home page, keep the page open while waiting, and remember that only text and HTML messages are accepted. Some services block disposable email domains entirely." }
+        "acceptedAnswer": { "@type": "Answer", "text": "The usual cause is the sending site refusing disposable domains: the message is never transmitted, so nothing arrives and nothing can be fixed on our side. Otherwise check the address character by character, keep the page open, and remember that attachments are stripped and messages over 5 MB are rejected." }
       },
       {
         "@type": "Question",
-        "name": "Do I need to register or provide personal data?",
-        "acceptedAnswer": { "@type": "Answer", "text": "No. There are no accounts and no personal data is collected. A disposable address is generated the moment you open the page, and you can change it at any time." }
+        "name": "Can I choose my own temporary email address?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Use the edit button next to the address to set any free name of 1 to 32 characters using a to z, 0 to 9, dot, underscore or hyphen, as long as it does not start or end with a dot or hyphen. Names are first come, first served, are not reserved and carry no password, so a memorable name is not a private one." }
       },
       {
         "@type": "Question",
-        "name": "Can I use a temporary email for account sign-ups?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Yes, for low-risk sign-ups like newsletters, downloads, trials, or testing. Because the inbox disappears when you reload the page, never use it for accounts you may need to recover later." }
+        "name": "Is a temporary inbox private?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. A temporary inbox is public by design: the address is the only key, and anyone who knows or guesses it can read the live mail. Never use it for confidential material, banking, or password recovery on an account you care about. Mail HTML renders in a sandboxed frame, but tracking pixels in a message still fire." }
       },
       {
         "@type": "Question",
-        "name": "Does TempMail.cc work on mobile?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Yes. The site is fully responsive and works in any modern mobile or desktop browser — no app installation required." }
+        "name": "Can I send email from a temp mail address?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. The service is receive-only: the SMTP endpoint accepts inbound mail for the domain and offers no authentication or outbound relay at all. You can read what arrives, but you cannot reply, forward, or initiate a message from a temporary address." }
       },
       {
         "@type": "Question",
-        "name": "How do I report abuse?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Send an email to hi@httpsmail.com with details of the abuse. We read and act on every report." }
+        "name": "Do I need to install an app to use it on mobile?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. TempMail.cc is a website that works in any modern browser. On Android and iOS you can add it to your home screen and it opens like an app, without an app store listing, an account, or a download." }
       }
     ]
   }
@@ -120,52 +116,90 @@
 
 <main class="container">
   <article class="legal-page">
-    <h1>Frequently Asked Questions</h1>
-    <p>Everything about using TempMail.cc, the free temporary and disposable email service.</p>
+    <h1>Temp mail questions, answered directly</h1>
+    <p>These are the twelve things people actually search for before using a disposable address — how long it lasts, what it refuses, and where it will not work. Where the answer is "no", it says no.</p>
 
-    <h2>What is a temporary email address?</h2>
-    <p>A temporary (disposable) email address is a short-lived inbox that you can use instead of your real email when signing up for services, downloading files, or testing applications. It protects your personal inbox from spam, phishing, and unwanted marketing — and from services that sell your address to advertisers.</p>
+    <h2 id="how-long">How long does a temporary email address last?</h2>
+    <p>Mail is kept for <b>about 30 minutes after the last message arrives</b>, and the clock restarts with every new message. An address that is still receiving stays alive; one that goes quiet for half an hour is swept and its contents are gone.</p>
+    <p>The address itself is a different thing from the mailbox, and this is where most people are surprised. A temporary address is not registered to you and cannot be reserved. While your tab is open it is bound to your connection, and other people cannot take it. Once the tab closes, the name is released — after a short delay while the server notices the dropped connection, tens of seconds at most — and anyone can claim it, including someone else who wants the same custom name. What survives after that is not the name but the mail, for the remainder of its 30 minutes, reachable from the same browser or from a recovery link.</p>
+    <p>That is why the service has no "keep this address forever" option. Permanent addresses are what a normal mailbox provider sells; a 30-minute window is the entire product here, and it is what makes the service free, accountless, and unable to accumulate a profile of you.</p>
 
-    <h2>Is TempMail.cc free?</h2>
-    <p>Yes, TempMail.cc is completely free. No registration, password, or personal information is required — a disposable address is generated the moment you open the page, and you can change it or set a custom one at any time.</p>
+    <h2 id="after-30-minutes">What happens to my emails after 30 minutes?</h2>
+    <p>They are <b>permanently deleted</b>. Not archived, not moved to a trash folder, not backed up anywhere. The mailbox is held in memory and a sweep timer removes it once the window closes. A recovery link stops working at the same moment, because the link points at that memory and nothing else.</p>
+    <p>Two practical consequences follow. First, copy anything you need — a confirmation code, a download link, a password-reset link — while the message is on screen. Once it is gone, no support request can bring it back; there is no store to search. Second, an inbox holds at most 20 messages: when the 21st arrives, the oldest one is dropped to keep memory bounded. A mailbox that gets flooded loses its oldest mail earlier than 30 minutes, so the message you are waiting for is safe, but the one you were about to read may not be.</p>
+    <p>If you need mail to persist, this is the wrong tool. Use it to receive a code and move on.</p>
 
-    <h2>How long do emails stay?</h2>
-    <p>Emails arrive in real time and are kept for about 30 minutes after the last message, then automatically and permanently deleted. Nothing is archived or backed up — if you need a code or link from an email, copy it while it's there.</p>
+    <h2 id="attachments">Can a temporary email receive attachments?</h2>
+    <p><b>No.</b> Attachments are stripped when the message is parsed, before it ever reaches the inbox. You get the text and HTML body, and nothing else. An invoice sent as a PDF arrives as the covering text with the file missing; an inline image referenced with <code>cid:</code> shows as a broken placeholder.</p>
+    <p>This is a deliberate limit, not a bug. Attachments are the most common delivery mechanism for malware, and storing multi-megabyte files for thousands of anonymous mailboxes would exhaust the server before anything else did. There is also no way to download one even if it were kept, since the interface only renders the body.</p>
+    <p>Two size limits sit behind that. A message larger than <b>5 MB</b> is refused during the SMTP conversation, so the sender receives an error instead of silently believing it was delivered — useful when you are debugging why a service says "email sent" and nothing appears. And the parser forwards only headers, text and HTML, so an attachment cannot leak through a different field.</p>
+    <p>If a sender must send you a file, ask for a link instead: a share URL in the message body survives just fine.</p>
 
-    <h2>How do I get back to my inbox after closing the page?</h2>
-    <p>In the same browser, just reopen the site — your address is restored automatically and recent mail replays. On another device (or after clearing your browser data), click <b>Recovery link</b> below the inbox and open the copied link within about 30 minutes. A recovery link gives full access to that inbox, so treat it like a password — and note that once it expires, the mail is gone for good.</p>
+    <h2 id="password">Can I get a temp mail address with a password?</h2>
+    <p><b>No, and there is no password field anywhere in the service.</b> People search for "temp mail with password" because they want the one thing a disposable inbox normally cannot give: a way to come back to the same address later. So it is worth being precise about what exists instead.</p>
+    <p>A <b>recovery link</b> is the closest equivalent. Click it below the inbox and you get a private URL that reopens the same mailbox — with its recent mail — on any device, for about 30 minutes. Treat it exactly like a password: anyone who has the link has full read access to that inbox, and it cannot be revoked once copied.</p>
+    <p>What does not exist is protection on the address itself. A custom name is first come, first served and unowned: no password guards it, so if someone else knows the name they can open the same mailbox and read its live mail. That is the trade the service makes, and it means an address with a memorable name is not a private one.</p>
+    <p>For anything you would want to log back into, use a real mailbox provider. A disposable inbox is for the code you need once.</p>
 
-    <h2>Can I send emails from a temporary address?</h2>
-    <p>No. TempMail.cc is a receive-only service. You can receive and read messages in real time, but sending is not supported.</p>
+    <h2 id="detectable">Is temp mail detectable by websites?</h2>
+    <p><b>Yes, and you should assume it will be.</b> Disposable domains are listed on public blocklists that many sign-up forms check automatically, sometimes before you submit and sometimes right after. When a site refuses, the rejection happens on their side: the message is never sent, so nothing reaches the inbox and no setting here can change it.</p>
+    <p>Because of that, this page will not tell you the service is "undetectable". Nothing on the client can hide the domain in the address you hand over. Any tool that promises otherwise is either describing a different mechanism — a real mailbox provider with throwaway aliases — or simply not telling the truth.</p>
+    <p>What you can do is choose the scenario. Low-stakes targets (newsletters, file downloads, trials, one-off forums, testing your own application) rarely block disposable domains and are exactly what this service is for. High-stakes targets (payment accounts, social accounts you want to keep, anything with recovery questions) block it more often and, even when they accept, tie you to an address that evaporates in half an hour.</p>
+    <p>Practical rule: if losing access would cost you something, do not use a disposable address for it.</p>
 
-    <h2>Can I receive attachments?</h2>
-    <p>No. Attachments are disabled for safety reasons. Only plain text and HTML messages are supported.</p>
+    <h2 id="facebook">Can I use temp mail for Facebook verification?</h2>
+    <p>Sometimes, with caveats. Facebook is one of the stricter platforms: it frequently asks for a phone number instead of an email, and it may accept the address at sign-up only to reject the domain at the confirmation step. When it does work, the address stays usable for about 30 minutes — long enough to finish the flow.</p>
+    <p>The real problem is what happens afterwards. The account is bound to an address you will lose, so password recovery, suspicious-login checks and "confirm it's you" prompts all point at a mailbox that no longer exists. For a throwaway page used once, that is acceptable. For an account you intend to keep, it is a trap.</p>
+    <p>If you only need the code, keep the tab open until it arrives and copy it immediately. If the form insists on a phone number, this service cannot help — there is no SMS capability and adding one would defeat the point.</p>
+    <p>The same reasoning applies on other platforms; there are per-site notes in our <a href="/for/facebook.html">Facebook</a>, <a href="/for/instagram.html">Instagram</a>, <a href="/for/discord.html">Discord</a>, <a href="/for/steam.html">Steam</a> and <a href="/for/temu.html">Temu</a> guides.</p>
 
-    <h2>Can I choose a custom email address?</h2>
-    <p>Yes. Click the edit button next to your address to set any available custom name, or click the refresh button to get a new random one. Custom names are first-come, first-served and not password protected — anyone who knows the name can read that mailbox.</p>
+    <h2 id="another-device">How do I open the same inbox on another device?</h2>
+    <p>Two ways, depending on where you are starting from.</p>
+    <p><b>Same browser:</b> just reopen the site. The address is saved locally, so it is restored automatically and the recent mail replays from the server's buffer. This also covers a reload, a crash, and a tab you closed by accident.</p>
+    <p><b>Different device or a cleared browser:</b> click <b>Recovery link</b> below the inbox on the original device and open the copied URL on the other one within about 30 minutes. The link contains the token that identifies the mailbox, so it works from any browser.</p>
+    <p>A recovery link is a bearer credential: whoever opens it sees the mail. Send it to your own phone or laptop, never to a chat with someone else, and do not paste it anywhere public. Once the 30-minute window closes, the link is dead along with the mail, and no new one can be issued.</p>
 
-    <h2>Is a temporary inbox private?</h2>
-    <p>Temporary inboxes are public by nature: anyone who knows the address can read its live mail. Never use TempMail.cc for confidential communications, sensitive accounts, or password recovery. For those, use a real email provider.</p>
-
-    <h2>Why am I not receiving emails?</h2>
+    <h2 id="not-receiving">Why am I not receiving emails?</h2>
+    <p>In order of how often each cause turns out to be the real one:</p>
     <ul>
-      <li>Check that you sent the message to the exact address shown on the home page;</li>
-      <li>Some messages take a minute or two — the inbox page now tells you this itself as you wait;</li>
-      <li>Only text and HTML messages are accepted; some very large messages are rejected;</li>
-      <li>Some services deliberately block disposable email domains — if so, the mail never reaches us. The waiting hints on the home page will tell you when this is the likely cause.</li>
+      <li><b>The sending site blocks disposable domains.</b> This is by far the most common. Their form may even say "email sent" while nothing was transmitted, because the check happens after their own validation. If the waiting hints on the home page say the address looks blocked, this is why.</li>
+      <li><b>The address does not match exactly.</b> Copy it with the copy button rather than retyping it; the alphabet deliberately omits <code>i</code>, <code>l</code>, <code>o</code>, <code>0</code> and <code>1</code>, but a hand-typed name from a screenshot still goes wrong.</li>
+      <li><b>The message is over 5 MB</b> and was refused at the SMTP stage. Senders usually report a bounce in that case; if they see nothing, this is not the cause.</li>
+      <li><b>It had an attachment and the body was empty.</b> Attachments are stripped, and a message that was only an attachment arrives as nothing useful.</li>
+      <li><b>The page was closed.</b> Live delivery needs the tab open. Reopen it in the same browser and the buffer replays.</li>
     </ul>
+    <p>What is not a cause: our rate limits. They cap how much one IP can send into the service per minute, not what a mailbox can receive, and legitimate sign-up mail never gets near them.</p>
 
-    <h2>Do I need to register or provide personal data?</h2>
-    <p>No. There are no accounts and no personal data is collected. See our <a href="/privacy.html">Privacy Policy</a> for details on what little data the service touches.</p>
+    <h2 id="custom-address">Can I choose my own temporary email address?</h2>
+    <p>Yes. Click the edit button next to the address and type any name that is still free. The rules are deliberately narrow: <b>1 to 32 characters</b> of <code>a-z</code>, <code>0-9</code>, dot, underscore or hyphen, and it may not start or end with a dot or a hyphen. Uppercase is not accepted; names are lowercase only.</p>
+    <p>Names are allocated first come, first served, and nothing is reserved. There is no password and no ownership record, so a name that is free today may belong to someone else's tab tomorrow. That has one useful consequence — you can pick something readable, like a project name, instead of an eight-character scramble — and one dangerous one: a memorable name is guessable, and anyone who guesses it reads the mail.</p>
+    <p>For anything that matters, keep the random name. It is drawn from a 31-character alphabet with the confusable characters removed, which gives about 8.5&times;10<sup>11</sup> combinations at the default length, and it is far harder to stumble into than <code>myname</code>.</p>
 
-    <h2>Can I use a temporary email for account sign-ups?</h2>
-    <p>Yes, for low-risk sign-ups like newsletters, downloads, free trials, or testing your own applications. Because the inbox only lasts about 30 minutes, never use it for accounts you may need to recover later.</p>
+    <h2 id="private">Is a temporary inbox private?</h2>
+    <p><b>No.</b> A temporary inbox is public by construction: the address is the only credential, and anyone who knows it can open the same mailbox and watch mail arrive. This is a consequence of having no accounts, not an oversight that could be patched by adding a login — the moment there is a login, it stops being disposable.</p>
+    <p>What that rules out: confidential correspondence, banking and payment mail, anything containing identity documents, and password-reset flows for accounts you actually care about. What it is fine for: sign-up codes, download links, trials, newsletters you will never read, and testing mail delivery in your own application.</p>
+    <p>Two mechanical details worth knowing. Mail HTML is rendered inside a sandboxed frame, so a script in a message cannot reach the page or your saved address. But tracking pixels still load, which tells the sender that the message was opened — the same is true of nearly every webmail client. And inbound SMTP is unencrypted: this server does not offer STARTTLS, so a message can be read in transit by anyone positioned on the path. None of that matters for a verification code; all of it matters for anything you would not put on a postcard.</p>
 
-    <h2>Does TempMail.cc work on mobile?</h2>
-    <p>Yes. The site is fully responsive and works in any modern mobile or desktop browser — no app installation required.</p>
+    <h2 id="send">Can I send email from a temp mail address?</h2>
+    <p><b>No.</b> The service is receive-only. The SMTP endpoint accepts inbound mail for the domain and offers no authentication and no outbound relay, so there is nothing to log in to and no way to originate a message.</p>
+    <p>You cannot reply to a message, cannot forward one, and cannot use the address to contact support desks that require a reply from the same address. If a site's flow depends on replying to a confirmation mail, it will not complete here.</p>
+    <p>The upside of that restriction is that the domain cannot be used to send spam in your name, which is part of why it is not blocked more aggressively than it already is.</p>
 
-    <h2>How do I report abuse?</h2>
-    <p>Send an email to <a href="mailto:hi@httpsmail.com">hi@httpsmail.com</a> with details of the abuse. We read and act on every report.</p>
+    <h2 id="mobile">Do I need to install an app to use it on mobile?</h2>
+    <p>No. TempMail.cc is a website and works in any current browser on Android and iOS. There is no app store listing, no download, and no account to create.</p>
+    <p>If you want an icon on your home screen, add the site to it: both Android Chrome and iOS Safari support that, and the installed version opens straight into a live inbox. It behaves like an app without being one — the mail still arrives over the network, so it needs a connection to work.</p>
+    <p>Desktop users get one extra feature: a QR code next to the address, which you can scan with a phone to open the same mailbox there. It is hidden on phones, where scanning your own screen would be pointless.</p>
+
+    <h2 id="more">Related reading</h2>
+    <ul>
+      <li><a href="/30-minute-email.html">30-minute email: what the timer actually covers</a></li>
+      <li><a href="/for/facebook.html">Using a temp mail address for Facebook</a></li>
+      <li><a href="/for/instagram.html">Using a temp mail address for Instagram</a></li>
+      <li><a href="/for/discord.html">Using a temp mail address for Discord</a></li>
+      <li><a href="/for/steam.html">Using a temp mail address for Steam</a></li>
+      <li><a href="/for/temu.html">Using a temp mail address for Temu</a></li>
+      <li><a href="/about.html">How TempMail.cc is built and what it stores</a></li>
+    </ul>
   </article>
 </main>
 

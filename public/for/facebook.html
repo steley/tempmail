@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temp Mail for Facebook Verification — What Works</title>
+  <meta name="description" content="Where a disposable address gets through Facebook's sign-up, where Facebook insists on a phone number instead, and why a temp-mail account is painful to recover.">
+  <link rel="canonical" href="https://tempmail.cc/for/facebook.html">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/logo.png">
+  <link rel="stylesheet" href="/css/modern.css?v=418c3a54">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="TempMail.cc">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Temp Mail for Facebook Verification — What Works">
+  <meta property="og:description" content="Where a disposable address gets through Facebook's sign-up, where a phone number is required instead, and why recovery breaks.">
+  <meta property="og:url" content="https://tempmail.cc/for/facebook.html">
+  <meta property="og:image" content="https://tempmail.cc/logo.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Temp Mail for Facebook Verification — What Works">
+  <meta name="twitter:description" content="Where a disposable address gets through Facebook's sign-up, where a phone number is required instead, and why recovery breaks.">
+  <meta name="twitter:image" content="https://tempmail.cc/logo.png">
+
+  <script src="/js/ga.js" defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "url": "https://tempmail.cc/for/facebook.html",
+    "inLanguage": "en",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can I sign up for Facebook with a temporary email address?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Sometimes. The email field accepts any valid address, but Facebook frequently asks for a phone number instead of, or in addition to, an email, and it may reject disposable domains after the form is submitted. When the address is accepted, the confirmation code normally arrives within a minute and the address stays alive for about 30 minutes." }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does Facebook ask for a phone number instead?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Phone verification is harder to create in bulk than email, so it is the platform's preferred gate when it suspects automated or bulk sign-ups. A temporary email service cannot provide an SMS number, and there is no workaround on this side." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I recover a Facebook account registered with temp mail?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Effectively no. Recovery sends a code to the address on file, and that mailbox is deleted about 30 minutes after the last message. Once it is gone, the account cannot be recovered through email, and Facebook support will ask for identity proof that a disposable account never had." }
+      }
+    ]
+  }
+  </script>
+</head>
+
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="brand">
+      <img src="/logo.svg" width="28" height="28" alt="TempMail.cc - Free Temporary Email Service Logo">
+      <span>TempMail<b>.cc</b></span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/faq.html">FAQ</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article class="legal-page">
+    <h1>Using a temp mail address for Facebook</h1>
+    <p>Facebook is one of the harder platforms to reach with a disposable address, and the reason is not a technical block on our side — it is that Facebook rarely treats email as the important credential. It wants a phone number, or it wants an address that will still exist next month.</p>
+    <p>This page covers where a temp mail address does get through, where it does not, and what you lose by using one. If you only want the mechanics, the steps are below. If you are deciding whether to do it at all, start with the last section.</p>
+
+    <h2>What Facebook actually asks for</h2>
+    <p>A Facebook sign-up has two identity fields, and either one can be demanded: an email address or a mobile number. In practice the flow often starts with an email and then, at the confirmation step, asks for a phone anyway — particularly on a new device, an unfamiliar IP, or a browser with no session history.</p>
+    <p>Confirmation arrives in one of two shapes. Most often it is a six-digit code you type into the form. Sometimes it is a link you click. Both work fine with a disposable inbox: a code is just text, and a link in the message body is clickable like any other. What does not work is anything that needs the address to exist later.</p>
+
+    <h2>Where a temp mail address works</h2>
+    <ul>
+      <li><b>The code or link reaches you.</b> Facebook's mail servers deliver to arbitrary domains, and nothing about a disposable address stops delivery at the SMTP layer.</li>
+      <li><b>The 30-minute window is enough.</b> A sign-up flow takes seconds, so the address outlives the task comfortably — as long as the tab stays open.</li>
+      <li><b>The form does not validate the domain.</b> Some sign-up paths do not check the address against disposable-domain lists at all, especially in regions where the flow is tuned for phone-first registration.</li>
+    </ul>
+
+    <h2>Where it fails</h2>
+    <p><b>Facebook insists on a phone number.</b> This is the most common failure, and there is no workaround here: the service receives mail, not SMS. If the form will not proceed without a mobile number, stop — a temporary email cannot substitute.</p>
+    <p><b>The domain is refused after submission.</b> Facebook does not always say so plainly. The form may appear to accept the address while no message is ever sent, which looks identical to "the code is late". If nothing arrives within a few minutes and the address is correct, assume the domain was rejected.</p>
+    <p><b>The account is flagged as suspicious.</b> New accounts that exist only on an address with no history are the exact pattern anti-abuse systems look for. Even a successful sign-up can be asked to verify again days later, at which point the inbox is long gone.</p>
+
+    <h2>Step by step</h2>
+    <ol>
+      <li>Open <a href="https://tempmail.cc/">TempMail.cc</a> and copy the address with the copy button — do not retype it.</li>
+      <li>Keep that tab open. Live delivery needs the connection; closing the tab stops the mailbox from being bound to you.</li>
+      <li>Paste the address into Facebook's sign-up form and submit.</li>
+      <li>Watch the inbox. The message appears within seconds of being sent; if several minutes pass with nothing, the domain was probably refused.</li>
+      <li>Copy the code or open the link immediately. The mailbox holds at most 20 messages and expires about 30 minutes after the last one arrives.</li>
+    </ol>
+
+    <h2>If the code never arrives</h2>
+    <p>First check the address against what you typed into the form, character by character. Then consider the three causes in order of likelihood: the domain was blocked silently, Facebook wants a phone number and never attempted the email, or the sign-up was rate-limited before any mail was generated.</p>
+    <p>There is no way to force a resend from our side, and nothing in the inbox log will tell you which of those happened — a blocked send leaves no trace, because nothing was transmitted. If you need the account, the honest move is to use an address you control.</p>
+
+    <h2>The recovery problem</h2>
+    <p>This is the part worth reading before you start. A Facebook account bound to a disposable address is one whose password reset goes to a mailbox that no longer exists. The address is deleted about 30 minutes after the last message, and with it every route back into the account.</p>
+    <p>Facebook's fallback recovery paths — identity documents, trusted contacts, a phone number on file — are exactly what a throwaway sign-up does not have. The result is an account that works until the first lockout and then cannot be reopened at all.</p>
+    <p>That is acceptable for a page you create to test something and never touch again. It is a bad trade for an account you intend to keep, even one you think of as low-stakes.</p>
+
+    <h2>Verdict</h2>
+    <p>Use a temp mail address for Facebook only when you need a one-off account and can afford to lose it: checking what a page looks like to a logged-in user, testing a signup flow you are building, or reading a group you will never return to. For anything else, use a real mailbox — a dedicated alias at a normal provider gives you the same separation from your main inbox without the 30-minute cliff.</p>
+    <p>If you do proceed, treat the account as already lost, and copy anything you need before the tab closes.</p>
+
+    <h2>Related reading</h2>
+    <ul>
+      <li><a href="/faq.html">Temp mail FAQ: lifetime, attachments, limits</a></li>
+      <li><a href="/for/instagram.html">Using temp mail for Instagram</a></li>
+      <li><a href="/for/discord.html">Using temp mail for Discord</a></li>
+      <li><a href="/30-minute-email.html">What "30-minute email" actually means</a></li>
+    </ul>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="https://tempmail.cc/">Home</a>
+    <a href="/about.html">About</a>
+    <a href="/faq.html">FAQ</a>
+    <a href="/changelog.html">Changelog</a>
+    <a href="/terms.html">Terms of Service</a>
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">GitHub</a>
+  </div>
+  <div class="copyright">&copy; 2026 TempMail.cc</div>
+</footer>
+</body>
+</html>

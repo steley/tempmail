@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temp Mail for Discord — Verification Without Recovery</title>
+  <meta name="description" content="Discord wants a verified email before you can talk in most servers. Where a temp mail address gets you verified, and what breaks when Discord asks again.">
+  <link rel="canonical" href="https://tempmail.cc/for/discord.html">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/logo.png">
+  <link rel="stylesheet" href="/css/modern.css?v=418c3a54">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="TempMail.cc">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Temp Mail for Discord — Verification Without Recovery">
+  <meta property="og:description" content="Where a disposable address gets a Discord account verified, and why losing the mailbox costs you the account later.">
+  <meta property="og:url" content="https://tempmail.cc/for/discord.html">
+  <meta property="og:image" content="https://tempmail.cc/logo.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Temp Mail for Discord — Verification Without Recovery">
+  <meta name="twitter:description" content="Where a disposable address gets a Discord account verified, and why losing the mailbox costs you the account later.">
+  <meta name="twitter:image" content="https://tempmail.cc/logo.png">
+
+  <script src="/js/ga.js" defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "url": "https://tempmail.cc/for/discord.html",
+    "inLanguage": "en",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Does Discord require email verification?",
+        "acceptedAnswer": { "@type": "Answer", "text": "An unverified account is heavily limited: most servers do not accept messages from it, and some features stay locked. Verification is a link Discord sends to the address on file, and a temporary inbox receives it fine as long as the tab is open." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use TempMail.cc to verify a Discord account?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes, mechanically. The verification email arrives within seconds, and the link works regardless of whether the address still exists afterwards. What does not survive is the account itself once Discord asks for a code or a password reset later." }
+      },
+      {
+        "@type": "Question",
+        "name": "What happens when the temp mail address expires?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The mailbox is deleted about 30 minutes after the last message. Any later verification, new-location check or password reset sent to that address is lost, and there is no way to recover it — Discord support cannot verify ownership of an address that no longer exists." }
+      }
+    ]
+  }
+  </script>
+</head>
+
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="brand">
+      <img src="/logo.svg" width="28" height="28" alt="TempMail.cc - Free Temporary Email Service Logo">
+      <span>TempMail<b>.cc</b></span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/faq.html">FAQ</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article class="legal-page">
+    <h1>Using a temp mail address for Discord</h1>
+    <p>Discord is the easiest of the big platforms to reach with a disposable address and the easiest to lose because of one. Sign-up needs only a username, and verification is a single link — but the account is permanently tied to whatever address you gave it, and every future security check goes there.</p>
+    <p>This page covers the mechanics, then the part that actually decides whether it is a good idea.</p>
+
+    <h2>What Discord needs from an email</h2>
+    <p>An unverified account can log in and read, but most servers refuse its messages, and several features stay locked until the address is confirmed. Verification is a link in an email — no code to type, no phone step unless the account trips an anti-abuse check.</p>
+    <p>Because it is a link, a temporary inbox handles it perfectly. The link is an ordinary URL in the message body; it does not require the domain to keep resolving, and clicking it from the same browser session completes verification immediately.</p>
+
+    <h2>Where it works well</h2>
+    <ul>
+      <li><b>Joining a server to read it.</b> Verification completes in under a minute, and reading requires no further mail.</li>
+      <li><b>Testing a bot or integration.</b> A disposable identity is genuinely the right tool when you need a second account for OAuth testing or permission checks.</li>
+      <li><b>Short-lived participation.</b> A support server you need once, a project you are evaluating, a community you will not return to.</li>
+    </ul>
+
+    <h2>Where it breaks</h2>
+    <p><b>New-location checks.</b> Log in from a different network and Discord may send a verification link to the address on file. If that mailbox is gone, the login stalls — and unlike some platforms, there is no fallback path once the session is lost.</p>
+    <p><b>Password reset.</b> The reset link goes to an address that expired about 30 minutes after its last message. An account with no working email and a forgotten password is an account you no longer have.</p>
+    <p><b>Domain refusal.</b> Some sign-up paths check addresses against disposable-domain lists. When they do, the email is simply never sent, and the verification prompt keeps reappearing with nothing arriving.</p>
+    <p><b>Recovery through support.</b> Discord support asks for proof you own the account, and "the mailbox it was registered to" is the standard proof. A disposable address cannot supply it.</p>
+
+    <h2>What verification actually unlocks</h2>
+    <p>Discord's unverified state is not a wall, it is a series of small walls. You can log in, join servers and read channels, but most servers reject messages from unverified accounts, direct messages stay limited, and many community servers gate posting behind verification to slow down spam. Verification is a link, sent once, and after that the address is rarely needed again — which is exactly why a temporary inbox is tempting.</p>
+    <p>The exception is anything that treats a mailbox as a security factor: password resets, "new login location" prompts, and account-deletion confirmations. Those arrive whenever Discord decides the session looks unfamiliar, and that timing is not something you control.</p>
+
+    <h2>Two-factor and backup codes</h2>
+    <p>If you enable two-factor authentication, Discord shows you a set of backup codes exactly once and tells you to store them somewhere safe. Do that, and keep them out of the account itself. With TOTP enabled and backup codes saved, a dead email becomes survivable — you can still log in, and you can still change the address. Without them, losing the mailbox and the phone leaves support as the only route.</p>
+    <p>This is the one configuration where a temp-mail Discord account can be made reasonably durable, and it is worth the two minutes if you intend to keep the account.</p>
+
+    <h2>Step by step</h2>
+    <ol>
+      <li>Open <a href="https://tempmail.cc/">TempMail.cc</a> and copy the address.</li>
+      <li>Keep the tab open through the whole flow — the inbox only receives while connected.</li>
+      <li>Register on Discord with that address, then open the inbox and click the verification link.</li>
+      <li>If you intend to keep the account at all, change the email to a real mailbox in Discord's account settings immediately, while you still have access.</li>
+    </ol>
+    <p>That last step is the only thing that makes a temp-mail Discord account durable, and it is worth doing within the 30-minute window rather than later.</p>
+
+    <h2>The honest recommendation</h2>
+    <p>For a throwaway account used to read one server or test an integration, a disposable address is exactly right: no inbox clutter, no marketing mail, nothing to clean up. For an account you will actually use — one with friends on it, one with a nickname people recognise, one with anything worth keeping — start with a real address. The cost of doing that later is a support ticket you will probably lose.</p>
+    <p>If you have already registered with a temp address and want to keep the account, change the email now. It takes a minute and it is the difference between an account and a demo.</p>
+
+    <h2>Related reading</h2>
+    <ul>
+      <li><a href="/faq.html">Temp mail FAQ: lifetime, attachments, limits</a></li>
+      <li><a href="/for/steam.html">Using temp mail for Steam</a></li>
+      <li><a href="/for/instagram.html">Using temp mail for Instagram</a></li>
+      <li><a href="/30-minute-email.html">What "30-minute email" actually means</a></li>
+    </ul>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="https://tempmail.cc/">Home</a>
+    <a href="/about.html">About</a>
+    <a href="/faq.html">FAQ</a>
+    <a href="/changelog.html">Changelog</a>
+    <a href="/terms.html">Terms of Service</a>
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">GitHub</a>
+  </div>
+  <div class="copyright">&copy; 2026 TempMail.cc</div>
+</footer>
+</body>
+</html>

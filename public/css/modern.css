@@ -107,9 +107,12 @@ body {
 }
 
 /* ---------- Address card ---------- */
-main { padding-top: 28px; }
+/* Top spacing lives on .address-card, not on main: `main.container` is matched
+   by `.container { padding: 0 20px }` (class beats element), so a
+   `main { padding-top }` here would silently do nothing. */
 
 .address-card {
+  margin-top: 24px;
   background:
     radial-gradient(circle at 85% 15%, rgba(255, 255, 255, .14) 0%, transparent 42%),
     linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
@@ -124,12 +127,16 @@ main { padding-top: 28px; }
   overflow: hidden;
 }
 
+/* h1 on purpose: "your temporary email address" is what this page is about,
+   so it is the document's main heading. Visually it stays a small label —
+   the address itself is the hero. The UA h1 margin/weight are reset. */
 .address-label {
+  margin: 0 0 8px;
   font-size: 13px;
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: .08em;
   opacity: .85;
-  margin-bottom: 8px;
 }
 
 .address-row {
@@ -173,6 +180,7 @@ main { padding-top: 28px; }
   .address-qr { display: none; } /* 手机上扫自己的屏幕没有意义 */
   .address-row { gap: 4px; padding: 5px; }
   .address-row .btn-icon { width: 32px; height: 32px; }
+  .address-card { margin-top: 16px; } /* 首屏更紧凑 */
 }
 
 #shortid {
@@ -306,7 +314,7 @@ main { padding-top: 28px; }
   border-bottom: 1px solid var(--border);
 }
 
-.inbox-head h1 { margin: 0; font-size: 19px; }
+.inbox-head h2 { margin: 0; font-size: 19px; }
 .inbox-hint { color: var(--text-secondary); font-size: 13px; }
 
 .mail-list { list-style: none; margin: 0; padding: 0; }
@@ -570,8 +578,8 @@ main { padding-top: 28px; }
   margin-top: 18px;
 }
 
-.seo-block h1 { margin: 0 0 10px; font-size: 20px; }
 .seo-block h2 { margin: 18px 0 8px; font-size: 16px; }
+.seo-block > h2:first-child { margin-top: 0; }
 .seo-block p { color: var(--text-secondary); margin: 0 0 12px; }
 .seo-block ul { margin: 0; padding-left: 20px; color: var(--text-secondary); }
 .seo-block li { margin: 3px 0; }

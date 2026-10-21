@@ -31,7 +31,10 @@ for (const asset of ASSETS) {
     .update(await readFile(path.join(root, asset)))
     .digest('hex')
     .slice(0, 8);
-  const pattern = new RegExp(`(${asset.replace(/[/.]/g, '\\$&')}\\?v=)[0-9a-f]+`);
+  // Match whatever is currently after ?v=, not just hex. The hand-written
+  // stamps in the HTML are arbitrary strings ("del3"): a hex-only class would
+  // replace just the leading "de" and leave "l3" behind, producing "?v=<hash>l3".
+  const pattern = new RegExp(`(${asset.replace(/[/.]/g, '\\$&')}\\?v=)[^"']*`);
   for (const file of htmlFiles) {
     const file_ = path.join(root, file);
     const html = await readFile(file_, 'utf8');

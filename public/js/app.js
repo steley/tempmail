@@ -176,8 +176,12 @@
     $shortid.placeholder = 'Loading ...';
     var saved = null;
     try { saved = localStorage.getItem('shortid'); } catch (e) {}
-    if (saved) $shortid.value = saved + '@' + location.hostname;
+    // fall back to whatever was on screen before editing started — a first-time
+    // visitor has no saved name, only the one painted before the socket opened
+    var restore = saved || pendingName;
+    if (restore) $shortid.value = restore + '@' + location.hostname;
     fitAddress();
+    if (restore) drawQR(restore + '@' + location.hostname);
   }
 
   $refresh.addEventListener('click', function () {
@@ -350,6 +354,42 @@
     if (e.key === 'Escape' && !$raw.hidden) $raw.hidden = true;
   });
 
+  /* ---------- first paint ---------- */
+
+  // The address used to appear only after 'request shortid' came back — the
+  // page's largest element sat empty for a whole round trip. Render one
+  // immediately instead: the saved name when there is one, otherwise a locally
+  // generated name that the server confirms on connect (and silently swaps if
+  // it happens to be taken). Same alphabet as src/lib/id.js so names look
+  // identical no matter which side produced them.
+  var pendingName = null;
+
+  function randomMailboxName(len) {
+    var A = 'abcdefghjkmnpqrstuvwxyz23456789';
+    var base = A.length;                       // 31
+    var limit = Math.floor(256 / base) * base; // 248: discard the biased tail
+    var out = '';
+    var buf = new Uint8Array(len + 8);
+    while (out.length < len) {
+      crypto.getRandomValues(buf);
+      for (var i = 0; i < buf.length && out.length < len; i++) {
+        if (buf[i] < limit) out += A[buf[i] % base];
+      }
+    }
+    return out;
+  }
+
+  (function primeAddress() {
+    if (!window.crypto || !crypto.getRandomValues) return; // no CSPRNG: keep the loading state
+    var saved = null;
+    try { saved = localStorage.getItem('shortid'); } catch (e) {}
+    if (!saved) pendingName = randomMailboxName(8);
+    var full = (saved || pendingName) + '@' + location.hostname;
+    $shortid.value = full;
+    fitAddress();
+    drawQR(full);
+  })();
+
   /* ---------- socket ---------- */
 
   // per-tab claim token, kept in sessionStorage (NOT localStorage):
@@ -414,6 +454,12 @@
       // storage says "fresh browser" but we still hold a live recovery token
       autoClaim = true;
       socket.emit('recover', recoveryToken, clientToken);
+    } else if (pendingName) {
+      // the name already rendered on first paint — claim that one instead of
+      // asking for a new one. A taken name falls through to the auto-claim
+      // fallback in 'shortid rejected' below.
+      autoClaim = true;
+      socket.emit('set shortid', pendingName, clientToken);
     } else {
       socket.emit('request shortid', clientToken);
     }
@@ -442,6 +488,7 @@
 
   socket.on('shortid', function (id) {
     autoClaim = false;
+    pendingName = null; // server owns the name now
     setMailAddress(id);
     setStatus('connected', 'Connected — live inbox active');
   });
@@ -468,10 +515,12 @@
     var wasAuto = autoClaim;
     autoClaim = false;
 
-    // stale restore: saved address is now held by someone else (or a zombie
-    // socket from before the reload) — silently fall back to a fresh mailbox
-    if (data && data.code === 'E_SHORTID_TAKEN' && wasAuto) {
+    // stale restore or a first-paint name the server won't take: fall back to
+    // a server-allocated mailbox instead of leaving the user on a dead address
+    if (data && wasAuto && (data.code === 'E_SHORTID_TAKEN' || data.code === 'E_SHORTID_RESERVED')) {
       try { localStorage.removeItem('shortid'); } catch (e) {}
+      pendingName = null;
+      $shortid.placeholder = 'Loading ...';
       socket.emit('request shortid', clientToken);
       return;
     }

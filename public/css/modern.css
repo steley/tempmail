@@ -598,29 +598,46 @@ body {
 
 /* ---------- Footer ---------- */
 /*
- * Brand line, then one labelled row per group, then a rule and a bottom
- * strip. Vertical columns were tried first and looked wrong: fourteen short
- * links do not fill a 960px grid, so the brand column sat alone with 100px
- * of dead space under it while the two link columns crowded the right edge.
- * Rows put each label beside its links and use the width instead.
+ * Three columns: brand, legal links and copyright on the left; a plain Site
+ * list in the middle; the six guides in a two-column grid on the right.
+ * Earlier shapes (three vertical columns, then label-beside-links rows) both
+ * failed the same way: fourteen short links cannot fill 960px, so one side
+ * of the strip went empty while the other crowded. Giving the widest group
+ * the widest column spreads the content across the full width instead.
  */
 .site-footer {
   margin-top: 40px;
-  padding: 32px 20px 24px;
+  padding: 34px 20px 30px;
   border-top: 1px solid var(--border);
   color: var(--text-secondary);
   font-size: 13.5px;
 }
 
-.footer-inner { max-width: 960px; margin: 0 auto; }
-
-.footer-brand {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  margin-bottom: 20px;
+.footer-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, .6fr) minmax(0, 1.35fr);
+  gap: 26px 40px;
+  align-items: start;
 }
+
+.footer-col-title {
+  margin: 0 0 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--text);
+  opacity: .45;
+}
+
+.footer-col a { color: var(--text-secondary); text-decoration: none; }
+.footer-col a:hover { color: var(--primary); }
+
+/* Left: brand over its one-line promise, then the small print underneath.
+   Stacking them keeps the eye on a single column of text. */
+.footer-col--brand { display: flex; flex-direction: column; align-items: flex-start; }
 .footer-brand-name {
   color: var(--text);
   font-size: 15px;
@@ -629,64 +646,22 @@ body {
   text-decoration: none;
 }
 .footer-brand-name:hover { color: var(--primary); }
-.footer-brand p { margin: 0; font-size: 12.5px; }
+.footer-tagline { margin: 5px 0 0; font-size: 12.5px; line-height: 1.5; }
+.footer-legal { display: flex; align-items: center; gap: 8px; margin-top: 17px; font-size: 12.5px; }
+.footer-legal .sep { opacity: .4; }
+.footer-copyright { margin: 7px 0 0; font-size: 12.5px; opacity: .7; }
 
-.footer-row {
-  display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
-  align-items: baseline;
-  gap: 4px 16px;
-  padding: 6px 0;
-}
-.footer-row-title {
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-  color: var(--text);
-  opacity: .45;
-}
-.footer-row-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 22px;
-  min-width: 0;
-}
-.footer-row-links a {
-  color: var(--text-secondary);
-  font-size: 13px;
-  text-decoration: none;
-}
-.footer-row-links a:hover { color: var(--primary); }
+/* Middle: five short labels read better as a list than as a wrapped run. */
+.footer-links { display: flex; flex-direction: column; align-items: flex-start; gap: 7px; font-size: 13px; }
 
-/* The six guide titles are long enough that flex-wrap leaves the last one
-   alone on its own line; a fixed pair of columns keeps them in three even
-   rows instead. Narrow screens go back to flowing, where two long titles no
-   longer fit side by side. */
-.footer-row-links--pairs {
+/* Right: the guide titles are long enough that flowing them would leave one
+   stranded on its own line, so they get a fixed pair of columns. */
+.footer-guides {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px 22px;
-  max-width: 500px;
+  gap: 7px 20px;
+  font-size: 13px;
 }
-
-.footer-bottom {
-  max-width: 960px;
-  margin: 24px auto 0;
-  padding-top: 15px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px 16px;
-  font-size: 12.5px;
-}
-
-.footer-legal { display: flex; align-items: center; gap: 9px; }
-.footer-legal a { color: var(--text-secondary); text-decoration: none; }
-.footer-legal a:hover { color: var(--primary); }
-.footer-legal .sep { opacity: .4; }
 
 /* ---------- Content pages (about/faq/terms/privacy/changelog/404) ---------- */
 .legal-page {
@@ -735,18 +710,25 @@ body {
   .empty-steps { flex-direction: column; align-items: flex-start; gap: 10px; margin: 0 auto; width: max-content; }
   .empty-steps li + li::before { display: none; }
 
-  /* footer: label above its links, links wrap underneath */
-  .site-footer { padding: 26px 20px 20px; }
-  .footer-brand { margin-bottom: 16px; }
-  .footer-row { grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 5px 0; }
-  .footer-row-links { gap: 6px 18px; }
-  .footer-row-links--pairs { display: flex; flex-wrap: wrap; max-width: none; }
-  .footer-bottom { flex-direction: column; align-items: flex-start; margin-top: 20px; gap: 6px; }
+  /* footer: everything in one column, guides keep their pair of columns */
+  .site-footer { padding: 28px 20px 24px; }
+  .footer-inner { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .footer-guides { gap: 7px 16px; }
+  /* five short labels stacked would add ~70px of height for nothing; a
+     wrapped row fits them in two lines instead */
+  .footer-links { flex-direction: row; flex-wrap: wrap; gap: 8px 20px; }
 }
 
 /* 中等宽度：允许换行但仍按 1→2→3 顺序 */
 @media (max-width: 880px) and (min-width: 641px) {
   .empty-steps { flex-wrap: wrap; }
+}
+
+/* Three columns below 860px leave the guide titles too narrow to sit on one
+   line, so the brand takes the full width and the two link groups pair up. */
+@media (max-width: 860px) and (min-width: 641px) {
+  .footer-inner { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 26px 32px; }
+  .footer-col--brand { grid-column: 1 / -1; }
 }
 
 /* ---------- Dark mode ---------- */

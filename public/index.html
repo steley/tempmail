@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png">
   <link rel="apple-touch-icon" href="/logo.png">
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-  <link rel="stylesheet" href="/css/modern.css?v=418c3a54">
+  <link rel="stylesheet" href="/css/modern.css?v=009bb731">
 
   <!-- Analytics: all tracking lives in /js/ga.js (self-hosters: replace or blank it) -->
   <script src="/js/ga.js" defer></script>
@@ -234,24 +234,37 @@
 </main>
 
 <footer class="site-footer">
-  <div class="footer-links">
-    <a href="https://tempmail.cc/">Home</a>
-    <a href="/about.html">About</a>
-    <a href="/faq.html">FAQ</a>
-    <a href="/changelog.html">Changelog</a>
-    <a href="/terms.html">Terms of Service</a>
-    <a href="/privacy.html">Privacy Policy</a>
-    <a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">GitHub</a>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a class="footer-brand-name" href="/">TempMail.cc</a>
+      <p>No account, no password, no ads.</p>
+    </div>
+    <nav class="footer-col" aria-label="Site">
+      <div class="footer-col-title">Site</div>
+      <a href="/">Home</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">About</a>
+      <a href="/changelog.html">Changelog</a>
+      <a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <nav class="footer-col" aria-label="Guides">
+      <div class="footer-col-title">Guides</div>
+      <a href="/30-minute-email.html">30-minute email</a>
+      <a href="/for/facebook.html">Temp mail for Facebook</a>
+      <a href="/for/instagram.html">Temp mail for Instagram</a>
+      <a href="/for/discord.html">Temp mail for Discord</a>
+      <a href="/for/steam.html">Temp mail for Steam</a>
+      <a href="/for/temu.html">Temp mail for Temu</a>
+    </nav>
   </div>
-  <div class="footer-guides">
-    <a href="/30-minute-email.html">30-minute email</a>
-    <a href="/for/facebook.html">Temp mail for Facebook</a>
-    <a href="/for/instagram.html">Temp mail for Instagram</a>
-    <a href="/for/discord.html">Temp mail for Discord</a>
-    <a href="/for/steam.html">Temp mail for Steam</a>
-    <a href="/for/temu.html">Temp mail for Temu</a>
+  <div class="footer-bottom">
+    <span class="copyright">&copy; 2026 TempMail.cc</span>
+    <span class="footer-legal">
+      <a href="/terms.html">Terms of Service</a>
+      <span class="sep" aria-hidden="true">&middot;</span>
+      <a href="/privacy.html">Privacy Policy</a>
+    </span>
   </div>
-  <div class="copyright">&copy; 2026 TempMail.cc</div>
 </footer>
 
 <script src="/js/socket.io.min.js?v=20261016a" defer></script>

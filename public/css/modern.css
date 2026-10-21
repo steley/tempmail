@@ -598,31 +598,30 @@ body {
 
 /* ---------- Footer ---------- */
 /*
- * Three zones: brand, site navigation, use-case guides, then a rule and a
- * bottom strip for copyright and legal. The previous version was three
- * centred rows of links with no grouping, which read as one flat list of
- * twelve items and wrapped into five ragged centred lines on a phone.
+ * Brand line, then one labelled row per group, then a rule and a bottom
+ * strip. Vertical columns were tried first and looked wrong: fourteen short
+ * links do not fill a 960px grid, so the brand column sat alone with 100px
+ * of dead space under it while the two link columns crowded the right edge.
+ * Rows put each label beside its links and use the width instead.
  */
 .site-footer {
   margin-top: 40px;
-  padding: 34px 20px 26px;
+  padding: 32px 20px 24px;
   border-top: 1px solid var(--border);
   color: var(--text-secondary);
   font-size: 13.5px;
 }
 
-.footer-inner {
-  max-width: 960px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 32px 56px;
-  align-items: start;
-}
+.footer-inner { max-width: 960px; margin: 0 auto; }
 
-.footer-brand { max-width: 240px; }
+.footer-brand {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-bottom: 20px;
+}
 .footer-brand-name {
-  display: inline-block;
   color: var(--text);
   font-size: 15px;
   font-weight: 600;
@@ -630,30 +629,51 @@ body {
   text-decoration: none;
 }
 .footer-brand-name:hover { color: var(--primary); }
-.footer-brand p { margin: 7px 0 0; font-size: 12.5px; line-height: 1.55; }
+.footer-brand p { margin: 0; font-size: 12.5px; }
 
-.footer-col { display: flex; flex-direction: column; gap: 8px; }
-.footer-col-title {
-  margin-bottom: 4px;
-  font-size: 11px;
+.footer-row {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px 16px;
+  padding: 6px 0;
+}
+.footer-row-title {
+  font-size: 10.5px;
   font-weight: 600;
   letter-spacing: .09em;
   text-transform: uppercase;
   color: var(--text);
-  opacity: .5;
+  opacity: .45;
 }
-.footer-col a {
+.footer-row-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  min-width: 0;
+}
+.footer-row-links a {
   color: var(--text-secondary);
   font-size: 13px;
-  line-height: 1.45;
   text-decoration: none;
 }
-.footer-col a:hover { color: var(--primary); }
+.footer-row-links a:hover { color: var(--primary); }
+
+/* The six guide titles are long enough that flex-wrap leaves the last one
+   alone on its own line; a fixed pair of columns keeps them in three even
+   rows instead. Narrow screens go back to flowing, where two long titles no
+   longer fit side by side. */
+.footer-row-links--pairs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 22px;
+  max-width: 500px;
+}
 
 .footer-bottom {
   max-width: 960px;
-  margin: 28px auto 0;
-  padding-top: 16px;
+  margin: 24px auto 0;
+  padding-top: 15px;
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -715,12 +735,13 @@ body {
   .empty-steps { flex-direction: column; align-items: flex-start; gap: 10px; margin: 0 auto; width: max-content; }
   .empty-steps li + li::before { display: none; }
 
-  /* footer: brand on its own row, the two link columns side by side */
-  .site-footer { padding: 26px 20px 22px; }
-  .footer-inner { grid-template-columns: 1fr 1fr; gap: 24px 16px; }
-  .footer-brand { grid-column: 1 / -1; max-width: none; }
-  .footer-col { gap: 7px; }
-  .footer-bottom { flex-direction: column; align-items: flex-start; margin-top: 22px; gap: 6px; }
+  /* footer: label above its links, links wrap underneath */
+  .site-footer { padding: 26px 20px 20px; }
+  .footer-brand { margin-bottom: 16px; }
+  .footer-row { grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 5px 0; }
+  .footer-row-links { gap: 6px 18px; }
+  .footer-row-links--pairs { display: flex; flex-wrap: wrap; max-width: none; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; margin-top: 20px; gap: 6px; }
 }
 
 /* 中等宽度：允许换行但仍按 1→2→3 顺序 */

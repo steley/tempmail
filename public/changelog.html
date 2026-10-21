@@ -63,80 +63,62 @@
 <main class="container">
   <article class="legal-page">
     <h1>What's New</h1>
-    <p class="changelog-lead">The latest improvements, fixes and features on TempMail.cc — newest first. We ship continuously; here are the changes that actually matter to you.</p>
+    <p class="changelog-lead">Notable changes to TempMail.cc, newest first. Small fixes are not listed.</p>
 
     <h2 class="changelog-date" id="2026-10-21"><time datetime="2026-10-21">October 21, 2026</time></h2>
     <div class="changelog-section">
       <ul>
-        <li><span class="badge badge-perf">Perf</span><b>Your address is there instantly.</b> The page no longer waits for the live connection before showing an address — it appears on first paint and is claimed the moment the inbox connects.</li>
-        <li><span class="badge badge-perf">Perf</span><b>Less to download on a phone.</b> The QR code helper is only fetched on screens wide enough to show it, so phones skip a script they never needed.</li>
-        <li><span class="badge badge-fix">Fix</span><b>Inbox heading spacing.</b> The "Inbox" title was falling back to default browser styling, so it sat too large and too close to the address bar.</li>
-        <li><span class="badge badge-fix">Fix</span><b>Clearer page titles.</b> Search results and link previews now describe what you actually get: a live inbox over WebSocket, 30-minute auto-expiry, no account, no sign-up.</li>
-        <li><span class="badge badge-new">New</span><b>Guides by use case.</b> New pages on using a temporary address for Facebook, Instagram, Discord, Steam and Temu, plus a longer piece on what a 30-minute window actually covers — including the cases where a disposable address is the wrong tool.</li>
-        <li><span class="badge badge-new">New</span><b>Straight answers in the FAQ.</b> Rewritten around the questions people actually search: how long an address lasts, whether it takes attachments, why there is no password, and which sites block disposable domains.</li>
-        <li><span class="badge badge-fix">Fix</span><b>The guides are reachable from every page.</b> The footer now lists all six guides alongside the site links, instead of hiding them on the homepage only.</li>
-        <li><span class="badge badge-new">New</span><b>Real answers instead of a brochure.</b> Every guide roughly doubled in length, with the parts that are actually useful: which of a platform's checks fire weeks after sign-up, what a support desk will ask for once the mailbox is gone, and the exact steps to move an account onto a permanent address before the window closes. The homepage and About page were rewritten the same way.</li>
-        <li><span class="badge badge-new">New</span><b>Who runs this, and since when.</b> The About page now states who operates the site, links the source, and records the history — a thin single page from 2023, rewritten from scratch in October 2026.</li>
-        <li><span class="badge badge-fix">Fix</span><b>A contact address that actually works.</b> Enquiries go to hi@httpsmail.com. The site's own domain cannot host a support mailbox — everything sent here is deleted after about thirty minutes — so the About page now explains where the mail goes and why.</li>
+        <li><span class="badge badge-new">New</span><b>Guides by use case.</b> Facebook, Instagram, Discord, Steam, Temu, and what a 30-minute window actually covers.</li>
+        <li><span class="badge badge-new">New</span><b>A clearer About page.</b> Who runs the site, how the mail path works, and which limits are deliberate.</li>
+        <li><span class="badge badge-new">New</span><b>FAQ rewritten</b> around the questions people actually ask — lifetime, attachments, why there is no password.</li>
       </ul>
     </div>
 
     <h2 class="changelog-date" id="2026-10-19"><time datetime="2026-10-19">October 19, 2026</time></h2>
     <div class="changelog-section">
       <ul>
-        <li><span class="badge badge-new">New</span><b>Delete mail manually.</b> You can now delete a message yourself instead of waiting for it to expire, and the mail view collapses cleanly to keep a long inbox tidy.</li>
-        <li><span class="badge badge-fix">Fix</span><b>Leaner navigation.</b> Removed the Terms and Privacy links from the page navigation — they remain available in the footer.</li>
-        <li><span class="badge badge-new">For self-hosters</span><b>Stricter defaults.</b> The web port now binds to loopback only (use a reverse proxy for public access), and the per-IP mail rate limit was raised to 24 mails per minute via <code>SMTP_MAX_MAILS_PER_IP_MIN</code>.</li>
+        <li><span class="badge badge-new">New</span><b>Delete a message yourself</b> instead of waiting for it to expire.</li>
+        <li><span class="badge badge-new">For self-hosters</span><b>Stricter defaults.</b> The web port binds to loopback; the per-IP mail limit is configurable.</li>
       </ul>
     </div>
 
     <h2 class="changelog-date" id="2026-10-16"><time datetime="2026-10-16">October 16, 2026</time></h2>
     <div class="changelog-section">
       <ul>
-        <li><span class="badge badge-new">New</span><b>Recovery links.</b> Click "Recovery link" to copy a private link that reopens your inbox — with the mail it received — on any device within about 30 minutes. No account needed; treat the link like a password.</li>
-        <li><span class="badge badge-new">New</span><b>Smarter waiting.</b> An empty inbox now explains itself: after a short wait it suggests checking the address was copied correctly, and later warns that many sites block disposable email domains on their side.</li>
-        <li><span class="badge badge-fix">Fix</span><b>Honest mail lifetime.</b> The site no longer claims mail is deleted on reload — messages are actually kept for about 30 minutes before being permanently deleted, and now say so.</li>
+        <li><span class="badge badge-new">New</span><b>Recovery links.</b> Copy a private link to reopen your inbox — with its mail — on another device within 30 minutes. Treat it like a password.</li>
+        <li><span class="badge badge-new">New</span><b>An empty inbox now explains itself,</b> including the fact that many sites block disposable domains on their side.</li>
       </ul>
     </div>
 
     <h2 class="changelog-date" id="2026-10-15"><time datetime="2026-10-15">October 15, 2026</time></h2>
     <div class="changelog-section">
       <ul>
-        <li><span class="badge badge-new">New</span><b>Install TempMail as an app.</b> The site is now a lightweight PWA — add it to your home screen and open your inbox straight from there.</li>
-        <li><span class="badge badge-new">New</span><b>Clearer error messages.</b> When something goes wrong, you'll see a short, reportable error code instead of a generic failure.</li>
-        <li><span class="badge badge-perf">Perf</span><b>Faster worldwide access.</b> Pages are now cached at the CDN edge, and the live inbox connects over WebSocket first for quicker delivery.</li>
-        <li><span class="badge badge-fix">Fix</span><b>Honest connection status.</b> The status indicator now reflects the real state of your live connection instead of guessing.</li>
-        <li><span class="badge badge-fix">Fix</span><b>Mobile address display.</b> Long temporary addresses now auto-fit on small screens instead of overflowing.</li>
-        <li><span class="badge badge-new">For self-hosters</span><b>Simplified Chinese documentation</b> is now available (<a href="https://github.com/steley/tempmail/blob/main/README.zh-CN.md" target="_blank" rel="noopener">README.zh-CN.md</a>), and the maximum accepted mail size is configurable — it now defaults to 1 MB to fit small-memory containers.</li>
+        <li><span class="badge badge-new">New</span><b>Installable as an app</b> — add it to your home screen.</li>
+        <li><span class="badge badge-new">New</span><b>Error codes</b> instead of a generic failure message.</li>
+        <li><span class="badge badge-perf">Perf</span><b>Pages are cached at the CDN edge,</b> and the inbox connects over WebSocket first.</li>
       </ul>
     </div>
 
     <h2 class="changelog-date" id="2026-10-14"><time datetime="2026-10-14">October 14, 2026</time></h2>
     <div class="changelog-section">
       <ul>
-        <li><span class="badge badge-new">New</span><b>Dark mode and QR code sharing.</b> The interface now follows your system theme, and you can generate a QR code of your temporary address to scan it on another device.</li>
-        <li><span class="badge badge-new">New</span><b>Smoother first-time experience.</b> A clearer empty-inbox guide and subtle animations when new mail arrives.</li>
-        <li><span class="badge badge-perf">Perf</span><b>Faster page load.</b> Removed render-blocking scripts so your inbox is ready sooner, especially on mobile.</li>
-        <li><span class="badge badge-fix">Fix</span><b>Reliable reconnection.</b> Fixed an issue where a temporary inbox could appear to lose messages after an interrupted connection recovered.</li>
-        <li><span class="badge badge-fix">Fix</span><b>Raw source view.</b> The raw email source panel now closes correctly when clicking anywhere on the close button.</li>
+        <li><span class="badge badge-new">New</span><b>Dark mode, and a QR code</b> for opening your address on another device.</li>
+        <li><span class="badge badge-fix">Fix</span><b>Reliable reconnection</b> after an interrupted connection.</li>
       </ul>
     </div>
 
     <h2 class="changelog-date" id="2026-10-13"><time datetime="2026-10-13">October 13, 2026</time></h2>
     <div class="changelog-section">
       <ul>
-        <li><span class="badge badge-new">New</span><b>Launch of the FAQ page.</b> Answers to the most common questions about temporary email, privacy and limits — see the <a href="/faq.html">FAQ</a>.</li>
-        <li><span class="badge badge-fix">Security</span><b>Hardened the service.</b> Added strict security headers, per-mailbox rate limiting and a full security audit pass.</li>
-        <li><span class="badge badge-fix">Fix</span><b>Clearer timestamps.</b> Emails that didn't arrive today now show the month and day instead of a bare time.</li>
-        <li><span class="badge badge-fix">Fix</span><b>Mobile layout polish.</b> Fixed several mobile display issues and cleaned up the footer.</li>
-        <li><span class="badge badge-new">For self-hosters</span><b>Docker deployment guide.</b> Complete documentation for running your own instance: clone, build, run, nginx WebSocket proxy and troubleshooting. See the <a href="/about.html">About</a> page for contact and project info.</li>
+        <li><span class="badge badge-new">New</span><b>FAQ page</b> and a Docker guide for running your own instance.</li>
+        <li><span class="badge badge-fix">Security</span><b>Strict security headers,</b> per-mailbox rate limiting, and a full audit pass.</li>
       </ul>
     </div>
 
     <h2 class="changelog-date" id="launch"><time datetime="2026-10-13">Complete rewrite — October 2026</time></h2>
     <div class="changelog-section">
       <ul>
-        <li>TempMail.cc is a <b>complete rewrite</b> of the 2015-era forsaken-mail project: a modern, dependency-clean stack powering a free temporary email service with a real-time inbox — no registration, no password, no personal data. Messages arrive the moment they are sent and are permanently deleted when your session ends. The full source is available on <a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">GitHub</a>.</li>
+        <li>A full rewrite of the 2015-era forsaken-mail project: real-time inbox, no registration, no password, source on <a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">GitHub</a>.</li>
       </ul>
     </div>
   </article>

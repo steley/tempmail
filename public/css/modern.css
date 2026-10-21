@@ -731,6 +731,12 @@ body {
   .footer-col--brand { grid-column: 1 / -1; }
 }
 
+/* 320px screens leave each guide column about 130px, which is narrower than
+   "Temp mail for Instagram"; one column beats four links split over two lines. */
+@media (max-width: 359px) {
+  .footer-guides { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* ---------- Dark mode ---------- */
 @media (prefers-color-scheme: dark) {
   :root {

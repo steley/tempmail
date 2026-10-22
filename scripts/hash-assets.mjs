@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
 // assets whose ?v= stamp is content-derived
-const ASSETS = ['/js/app.js', '/css/modern.css'];
+const ASSETS = ['/js/app.js', '/css/modern.css', '/logo.svg', '/logo.png', '/favicon.png'];
 
 // every .html under public/, including subdirectories such as /for/
 const htmlFiles = (await readdir(root, { recursive: true })).filter((f) => f.endsWith('.html'));

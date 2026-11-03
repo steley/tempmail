@@ -212,7 +212,7 @@ export function startSmtpGateway() {
       cb();
     };
     server.close(() => done());
-    setTimeout(() => { server.unref(); done(); }, timeoutMs).unref();
+    setTimeout(() => { server.server.unref(); done(); }, timeoutMs).unref();
     log.info('closing: no new SMTP connections accepted');
   };
 

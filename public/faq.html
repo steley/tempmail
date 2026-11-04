@@ -11,7 +11,7 @@
   <link rel="shortcut icon" href="/favicon.png?v=3584193d">
   <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=1">
   <link rel="apple-touch-icon" href="/logo.png?v=b430191d">
-  <link rel="stylesheet" href="/css/modern.css?v=b904fd07">
+  <link rel="stylesheet" href="/css/modern.css?v=75bf32b1">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="TempMail.cc">
   <meta property="og:locale" content="en_US">
@@ -177,7 +177,7 @@
 
     <h2 id="private">Is a temporary inbox private?</h2>
     <p><b>No.</b> A temporary inbox is public by construction: the address is the only credential, and anyone who knows it can open the same mailbox and watch mail arrive. This is a consequence of having no accounts, not an oversight that could be patched by adding a login — the moment there is a login, it stops being disposable.</p>
-    <p>What that rules out: confidential correspondence, banking and payment mail, anything containing identity documents, and password-reset flows for accounts you actually care about. What it is fine for: sign-up codes, download links, trials, newsletters you will never read, and testing mail delivery in your own application.</p>
+    <p>What that rules out: confidential correspondence, banking and payment mail, anything containing identity documents, and password-reset flows for accounts you actually care about. What it is fine for: sign-up codes, download links, trials, newsletters you will never read, and testing mail delivery in your own application — the <a href="/for/developers.html">developer guide</a> documents the realtime protocol for that case.</p>
     <p>Two mechanical details worth knowing. Mail HTML is rendered inside a sandboxed frame, so a script in a message cannot reach the page or your saved address. But tracking pixels still load, which tells the sender that the message was opened — the same is true of nearly every webmail client. And inbound SMTP is unencrypted: this server does not offer STARTTLS, so a message can be read in transit by anyone positioned on the path. None of that matters for a verification code; all of it matters for anything you would not put on a postcard.</p>
 
     <h2 id="send">Can I send email from a temp mail address?</h2>
@@ -234,6 +234,7 @@
         <a href="/for/discord.html">Temp mail for Discord</a>
         <a href="/for/steam.html">Temp mail for Steam</a>
         <a href="/for/temu.html">Temp mail for Temu</a>
+        <a href="/for/developers.html">For developers</a>
       </div>
     </nav>
   </div>

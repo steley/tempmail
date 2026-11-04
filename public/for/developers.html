@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temp Mail for Developers — Realtime Inbox Protocol, No API Key</title>
+  <meta name="description" content="Receive signup codes in a script with the same Socket.IO protocol the web inbox uses. Events, error codes, limits, self-hosting. No account or API key.">
+  <link rel="canonical" href="https://tempmail.cc/for/developers.html">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#f6f3ec">
+  <link rel="shortcut icon" href="/favicon.png?v=3584193d">
+  <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=1">
+  <link rel="apple-touch-icon" href="/logo.png?v=b430191d">
+  <link rel="stylesheet" href="/css/modern.css?v=75bf32b1">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="TempMail.cc">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Temp Mail for Developers — Realtime Inbox Protocol, No API Key">
+  <meta property="og:description" content="The same Socket.IO protocol the web inbox uses, documented for scripts: events, error codes, limits and self-hosting.">
+  <meta property="og:url" content="https://tempmail.cc/for/developers.html">
+  <meta property="og:image" content="https://tempmail.cc/logo.png?v=1">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Temp Mail for Developers — Realtime Inbox Protocol, No API Key">
+  <meta name="twitter:description" content="The same Socket.IO protocol the web inbox uses, documented for scripts: events, error codes, limits and self-hosting.">
+  <meta name="twitter:image" content="https://tempmail.cc/logo.png?v=1">
+
+  <script src="/js/ga.js" defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "url": "https://tempmail.cc/for/developers.html",
+    "inLanguage": "en",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is there a REST API?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. There is no REST endpoint, no message-list URL and no webhook. The web inbox and a script use the same Socket.IO protocol: claim a mailbox name and listen for pushed 'mail' events. Mail is held in process memory for 30 minutes, so there is no persistent message list to poll." }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need an API key or an account?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. There are no accounts, no passwords and no keys. A connection claims a mailbox name and receives whatever is sent to it. The trade-off is that the name is the only credential: anyone who knows it can subscribe to the same live mail, so send only synthetic test data." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use a fixed address for deterministic tests?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Emit 'set shortid' with a name of 1 to 32 lowercase letters, digits, dots, underscores or hyphens. Names are first come, first served, are not reserved and have no password. If another live connection holds the name you get E_SHORTID_TAKEN, so add a run-specific suffix rather than reusing one fixed name across parallel jobs." }
+      },
+      {
+        "@type": "Question",
+        "name": "What happens if my script disconnects before the mail arrives?",
+        "acceptedAnswer": { "@type": "Answer", "text": "On the next claim the server emits 'mail history' once, with the messages still in its 30-minute replay buffer. Deduplicate by the _id field, because a reconnect replays messages the client may already have seen. A server restart clears the entire buffer and changes the 'boot' id." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I run this in CI or self-host it?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Both work. The service is GPL-2.0 and runs as one Node process with no database or queue: build the image, expose port 25 directly, point an MX record at the host and run exactly one instance. Note that many sign-up forms block known disposable domains, which is a rejection on their side, not a delivery failure." }
+      }
+    ]
+  }
+  </script>
+</head>
+
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="brand">
+      <img src="/logo.svg?v=9629a9e5" width="28" height="28" alt="TempMail.cc - Free Temporary Email Service Logo">
+      <span>TempMail<b>.cc</b></span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/faq.html">FAQ</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article class="legal-page">
+    <h1>Temp mail for developers</h1>
+    <p>This page documents how to receive mail from a script. There is <b>no REST API and no API key</b>: the web inbox and your script speak the same Socket.IO protocol. Mail is pushed the instant it arrives, and the whole service is one open-source Node process that you can also run yourself. If you came here looking for a <code>GET /messages</code> endpoint, read the section on why one does not exist before designing around it.</p>
+
+    <h2>A working example</h2>
+    <p>Install the client with <code>npm install socket.io-client</code>, save the following as <code>inbox.mjs</code> and run <code>node inbox.mjs</code>. It claims a random address, prints it, and logs the first message that lands there. This is the same sequence the browser uses when you open the home page.</p>
+<pre><code>import { io } from 'socket.io-client';
+
+const ORIGIN = 'https://tempmail.cc';
+const socket = io(ORIGIN, { transports: ['websocket'] });
+
+socket.on('connect', () =&gt; socket.emit('request shortid'));
+
+socket.on('shortid', (name) =&gt; {
+  console.log(`Send mail to: ${name}@tempmail.cc`);
+});
+
+socket.on('mail', (mail) =&gt; {
+  console.log('Subject:', mail.headers.subject);
+  console.log('From:   ', mail.headers.from);
+  console.log('Body:   ', mail.text || mail.html);  // a verification code lives here
+  socket.close();                                  // one mail is enough for a test
+});
+
+socket.on('shortid rejected', (e) =&gt; console.error(e.code, e.message));
+socket.on('connect_error', (e) =&gt; console.error('Connection failed:', e.message));</code></pre>
+    <p>Copy the printed address into whatever form you are testing and trigger the mail. In a test runner, wrap the <code>mail</code> event in a Promise with a timeout instead of logging it — <code>scripts/e2e.mjs</code> in the repository does exactly that, including a hand-rolled SMTP client that sends the test message.</p>
+    <p>To claim a name you choose instead of a random one, replace the <code>connect</code> handler:</p>
+<pre><code>socket.on('connect', () =&gt; socket.emit('set shortid', 'signup-test-01'));</code></pre>
+    <p>That name is not reserved for you. It is first come, first served, has no password, and is released when the last listener disconnects. Add a run-specific suffix for parallel jobs rather than reusing one literal across a test suite.</p>
+
+    <h2>Why there is no REST endpoint</h2>
+    <p>Mail is not stored in a database. It is parsed in a worker thread, placed in an in-memory replay buffer, and pushed to whoever is listening; the buffer is swept 30 minutes after the last message. There is no durable message list to page through, and adding one would require the database, accounts and retention policy this service deliberately does without.</p>
+    <p>The consequence for your code: <b>subscribe, do not poll.</b> A claim is followed by one <code>mail history</code> event containing whatever is still buffered (at most 20 messages), then live <code>mail</code> events. Reconnects replay the buffer, so deduplicate by <code>_id</code>. The <code>boot</code> event carries a per-process id; if it changes, the server restarted and every mailbox, id and recovery token from before is gone — clear local state instead of merging the two generations.</p>
+
+    <h2>Client → server events</h2>
+    <table>
+      <thead><tr><th>Event</th><th>Arguments</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>request shortid</code></td><td><code>clientToken?</code></td><td>Allocate a random 8-character name and claim it.</td></tr>
+        <tr><td><code>set shortid</code></td><td><code>name, clientToken?</code></td><td>Claim a specific name. Rejected if invalid, reserved, or held by a different token.</td></tr>
+        <tr><td><code>recover</code></td><td><code>token, clientToken?</code></td><td>Reclaim the mailbox behind a recovery token, kicking current listeners.</td></tr>
+        <tr><td><code>delete mail</code></td><td><code>mailId, ack?</code></td><td>Remove one message from your own mailbox's buffer; <code>ack</code> receives <code>{ ok }</code>.</td></tr>
+      </tbody>
+    </table>
+    <p><code>clientToken</code> is an arbitrary per-tab string. It lets the server tell your own reconnect from a stranger claiming the same name: the same token takes over a stale socket, a different one gets <code>E_SHORTID_TAKEN</code>. A one-shot script can omit it. It is not authentication and grants no privacy.</p>
+
+    <h2>Server → client events</h2>
+    <table>
+      <thead><tr><th>Event</th><th>Payload</th></tr></thead>
+      <tbody>
+        <tr><td><code>shortid</code></td><td><code>name</code> — the mailbox now bound to this socket.</td></tr>
+        <tr><td><code>shortid rejected</code></td><td><code>{ name, code, message }</code>.</td></tr>
+        <tr><td><code>boot</code></td><td><code>{ id }</code> — process id; a change means the in-memory store is gone.</td></tr>
+        <tr><td><code>mail</code></td><td>One parsed message (shape below).</td></tr>
+        <tr><td><code>mail history</code></td><td><code>Mail[]</code> — replay buffer, emitted once right after a claim.</td></tr>
+        <tr><td><code>mail deleted</code></td><td><code>{ id }</code> — broadcast to every socket on that mailbox.</td></tr>
+        <tr><td><code>recovery</code></td><td><code>{ token, expiresAt }</code> — a bearer credential for reopening the inbox.</td></tr>
+        <tr><td><code>recovery rejected</code></td><td><code>{ message }</code> — the token expired or is invalid.</td></tr>
+        <tr><td><code>server error</code></td><td><code>{ code, message }</code> — a notification; the socket stays open.</td></tr>
+      </tbody>
+    </table>
+    <p>A <code>mail</code> payload contains only the parts the parser kept. Headers are flat strings, and <code>html</code> may be <code>null</code>:</p>
+<pre><code>{
+  "_id": 42,
+  "headers": {
+    "from": "Acme &lt;no-reply@acme.example&gt;",
+    "to": "h7k2mq9x@your-domain.example",
+    "subject": "Your verification code",
+    "date": "2026-11-05T07:00:00.000Z"
+  },
+  "recipients": ["h7k2mq9x@your-domain.example"],
+  "html": "&lt;p&gt;Your code is 482913&lt;/p&gt;",
+  "text": "Your code is 482913"
+}</code></pre>
+    <p>Routing uses the parsed recipient addresses, never the raw <code>To:</code> header text, so a display name containing <code>@</code> cannot deliver a copy to an unrelated mailbox. <code>recipients</code> holds the structured addresses from the envelope. Attachments are stripped before any of this reaches a socket.</p>
+
+    <h2>Error codes</h2>
+    <table>
+      <thead><tr><th>Code</th><th>Where</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>E_SHORTID_INVALID</code></td><td>claim</td><td>Name failed the allowlist: 1–32 chars of <code>a-z0-9._-</code>, no leading or trailing dot or dash.</td></tr>
+        <tr><td><code>E_SHORTID_RESERVED</code></td><td>claim</td><td>Name is reserved (<code>admin</code>, <code>postmaster</code>, <code>abuse</code>, …).</td></tr>
+        <tr><td><code>E_SHORTID_TAKEN</code></td><td>claim</td><td>Another live socket holds it and your token is not an owner token.</td></tr>
+        <tr><td><code>E_RATE_LIMITED</code></td><td>notification</td><td>Per-mailbox budget for machine-generated notices exhausted this minute. Real mail is never throttled.</td></tr>
+        <tr><td><code>E_MAIL_TOO_BIG</code></td><td>notification</td><td>A message exceeded the size cap and was cut mid-DATA; the sender gets an SMTP error.</td></tr>
+        <tr><td><code>E_NOT_FOUND</code> / <code>E_INTERNAL</code></td><td>HTTP</td><td>Returned as <code>X-Error-Code</code>; JSON clients get <code>{ ok, code, message }</code>.</td></tr>
+      </tbody>
+    </table>
+    <p>User-facing wording lives server-side, so a new code ships without a frontend deploy. Unknown codes degrade to <code>E_INTERNAL</code> client-side.</p>
+
+    <h2>Limits that change how you write the test</h2>
+    <ul>
+      <li><b>No authentication.</b> The mailbox name is the only credential for live mail. Anyone who knows or guesses it can subscribe. Send synthetic data only, never real user mail.</li>
+      <li><b>30 minutes, not forever.</b> A mailbox expires 30 minutes after its most recent message; each new arrival resets the clock. The buffer keeps at most 20 messages per mailbox and 64 MB globally, evicting the soonest-to-expire mailbox first.</li>
+      <li><b>No attachments, no large mail.</b> Only text and HTML bodies are forwarded. Messages over 5 MB are refused during the SMTP conversation, so the sender is told instead of believing it was delivered.</li>
+      <li><b>Inbound SMTP is plaintext.</b> <code>AUTH</code> and <code>STARTTLS</code> are disabled; the hop from the sending MTA to this host is not encrypted.</li>
+      <li><b>One process only.</b> State is in memory. Restarting clears every mailbox and recovery token; running two replicas splits mail and loses replay history. Do not put a CDN or proxy in front of the mail port.</li>
+      <li><b>Every recipient is accepted at RCPT time.</b> Routing happens after DATA, by recipient local part. A name that fails the allowlist lands nowhere.</li>
+      <li><b>Recovery is a takeover, not a mirror.</b> <code>recover</code> disconnects current listeners. Two processes sharing one token will kick each other.</li>
+      <li><b>Disposable domains get blocked.</b> Many sign-up forms check public blocklists. When that happens the mail is never transmitted; no setting here changes it.</li>
+    </ul>
+    <p>There is also no outbound path: the service receives only. If your flow depends on a reply from the same address, it will not complete here.</p>
+
+    <h2>Self-hosting</h2>
+    <p>The server, SMTP gateway and frontend are GPL-2.0 and in one repository. Build and run with port 25 reachable directly and an MX record pointing at the host:</p>
+<pre><code>docker build -t tempmail .
+docker run -d --name tempmail \
+  -p 3000:3000 -p 25:25 \
+  --restart unless-stopped \
+  tempmail
+
+curl localhost:3000/healthz     # {"ok":true}</code></pre>
+    <p>Web traffic may sit behind nginx or a CDN; mail may not. Run exactly one instance. The knobs most likely to matter in a test environment are <code>MAIL_TTL_MINUTES</code> (30), <code>MAIL_STORE_MAX_PER_MAILBOX</code> (20), <code>MAIL_STORE_MAX_BYTES</code> (64 MB), <code>SMTP_MAX_MAIL_BYTES</code> (5 MB) and <code>REALTIME_MAX_BROADCASTS_SEC</code> (200). The repository README lists all of them, <code>docs/protocol.md</code> is the authoritative event table, and <code>docs/operations.md</code> explains memory sizing and the failure modes of scaling out.</p>
+
+    <h2>Good fits and bad fits</h2>
+    <p><b>Good fits:</b> exercising your own sign-up or password-reset flow, end-to-end tests that need a verification code, QA environments, demos, and anything where a synthetic address is thrown away with the test run. A self-hosted instance keeps the domain out of public disposable-domain lists, which removes the most common cause of a missing code.</p>
+    <p><b>Bad fits:</b> real user correspondence, anything containing personal data, attachments, messages you need tomorrow, or several machines all claiming the same fixed name. Nothing here is private and nothing here is durable. For an account you intend to keep, use a real mailbox.</p>
+
+    <h2>Questions</h2>
+    <h3>Is there a REST API?</h3>
+    <p>No. There is no REST endpoint, no message-list URL and no webhook. Claim a name over Socket.IO and listen for pushed <code>mail</code> events; mail lives in process memory for 30 minutes, so there is no persistent list to poll.</p>
+
+    <h3>Do I need an API key or an account?</h3>
+    <p>No. No accounts, no passwords, no keys. The trade-off is that the name is the only credential: anyone who knows it can subscribe to the same live mail. Send only synthetic test data.</p>
+
+    <h3>Can I use a fixed address for deterministic tests?</h3>
+    <p>Yes, with <code>set shortid</code> and a name of 1–32 lowercase letters, digits, dots, underscores or hyphens. Names are first come, first served, unreserved and unprotected. A name held by another live connection returns <code>E_SHORTID_TAKEN</code>, so use a run-specific suffix rather than one literal across parallel jobs.</p>
+
+    <h3>What happens if my script disconnects before the mail arrives?</h3>
+    <p>The next claim triggers one <code>mail history</code> event with the buffered messages. Deduplicate by <code>_id</code>, because a reconnect replays mail you may already have. A server restart clears the buffer and changes the <code>boot</code> id.</p>
+
+    <h3>Can I run this in CI or self-host it?</h3>
+    <p>Both. Build the image, expose port 25 directly, point an MX record at the host and run exactly one instance. Remember that many sign-up forms block known disposable domains — that rejection happens on their side, not here.</p>
+
+    <h2>Related reading</h2>
+    <ul>
+      <li><a href="/faq.html">Temp mail FAQ: lifetime, attachments, limits</a></li>
+      <li><a href="/30-minute-email.html">What "30-minute email" actually means</a></li>
+      <li><a href="/about.html">How the service is built</a></li>
+      <li><a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">Source code and full documentation on GitHub</a></li>
+    </ul>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col footer-col--brand">
+      <a class="footer-brand-name" href="/">TempMail.cc</a>
+      <p class="footer-tagline">No account, no password, no sign-up.</p>
+      <span class="footer-legal">
+        <a href="/terms.html">Terms of Service</a>
+        <span class="sep" aria-hidden="true">&middot;</span>
+        <a href="/privacy.html">Privacy Policy</a>
+      </span>
+      <p class="footer-copyright">&copy; 2026 TempMail.cc</p>
+    </div>
+    <nav class="footer-col" aria-label="Site">
+      <div class="footer-col-title">Site</div>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/about.html">About</a>
+        <a href="/changelog.html">Changelog</a>
+        <a href="https://github.com/steley/tempmail" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </nav>
+    <nav class="footer-col" aria-label="Guides">
+      <div class="footer-col-title">Guides</div>
+      <div class="footer-guides">
+        <a href="/30-minute-email.html">30-minute email</a>
+        <a href="/for/facebook.html">Temp mail for Facebook</a>
+        <a href="/for/instagram.html">Temp mail for Instagram</a>
+        <a href="/for/discord.html">Temp mail for Discord</a>
+        <a href="/for/steam.html">Temp mail for Steam</a>
+        <a href="/for/temu.html">Temp mail for Temu</a>
+        <a href="/for/developers.html">For developers</a>
+      </div>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

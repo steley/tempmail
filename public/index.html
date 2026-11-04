@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=1">
   <link rel="apple-touch-icon" href="/logo.png?v=b430191d">
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-  <link rel="stylesheet" href="/css/modern.css?v=b904fd07">
+  <link rel="stylesheet" href="/css/modern.css?v=75bf32b1">
 
   <!-- Analytics: all tracking lives in /js/ga.js (self-hosters: replace or blank it) -->
   <script src="/js/ga.js" defer></script>
@@ -233,6 +233,7 @@
     <h2>How the inbox works</h2>
     <p>Mail arrives over SMTP and is pushed to your browser over a WebSocket connection, so a message appears a second or two after it is sent rather than when you next refresh. Nothing is written to disk: the mailbox lives in the server's memory, which is why a server restart clears it and why there is no archive to request later.</p>
     <p>If your tab was closed or asleep when mail arrived, the stored copy is replayed as soon as you reopen the address — including on a different device, if you saved the recovery link. That replay window is the same 30 minutes as the mailbox itself; it is a convenience for a reconnect, not a backup.</p>
+    <p>Testing your own sign-up flow rather than a website's? <a href="/for/developers.html">The developer guide</a> documents the same realtime protocol for scripts and test runners, with its events, error codes and limits.</p>
 
     <h2>What it does not do</h2>
     <ul>
@@ -292,6 +293,7 @@
         <a href="/for/discord.html">Temp mail for Discord</a>
         <a href="/for/steam.html">Temp mail for Steam</a>
         <a href="/for/temu.html">Temp mail for Temu</a>
+        <a href="/for/developers.html">For developers</a>
       </div>
     </nav>
   </div>
